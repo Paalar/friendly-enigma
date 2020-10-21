@@ -1,0 +1,5 @@
+--find-links https://download.pytorch.org/whl/torch_stable.html
+
+wheel
+pandas
+torch==1.6.0
