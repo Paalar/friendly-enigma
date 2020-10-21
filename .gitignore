@@ -2,6 +2,11 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,macos,windows,linux,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,macos,windows,linux,visualstudiocode
 
+### HELOC
+heloc_data_dictionary-2.xlsx
+heloc_dataset_v1.csv
+
+
 ### Linux ###
 *~
 
