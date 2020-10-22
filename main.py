@@ -19,13 +19,15 @@ def read_csv() -> DataFrame:
     return pd.read_csv(CSV_FILE)
 
 def split_predictor(data: DataFrame) -> Tuple[DataFrame, Series]:
-    data.loc[data['RiskPerformance'] == 'Bad'] = 0 # Normalize predictor values before popping column
-    data.loc[data['RiskPerformance'] == 'Good'] = 1
-    return data, data.pop('RiskPerformance')
+    predictions_label = data.pop('RiskPerformance')
+    normalized_prediction_labels = [0 if label == "Bad" else 1 for label in predictions_label]
+    return data, normalized_prediction_labels
 
 def tensor_predictor(data: Series) -> torch.Tensor:
-    data = data.reset_index(drop=True) # Resets index and removes the Index column
-    data = torch.Tensor(data)
+    #print(data)
+    #data = [torch.tensor(value, dtype=torch.float) for value in data]
+    data = torch.tensor(data, dtype=torch.float)
+    print(data)
     return data
 
 def setup(dataset: DataFrame) -> Tuple[Tuple[DataLoader, Series], Tuple[DataLoader, Series]]:
@@ -52,7 +54,7 @@ def main():
     input_length = len(train_loader.dataset[0][0])
     net = Net(input_length=input_length, output_length=nodes_before_split)
     model = MultiTaskOutputWrapper(model_core=net, input_length=nodes_before_split, output_length=(1,1))
-    model.train(train_loader.dataset, train_predictor)
+    model.train(train_loader, train_predictor)
     
 
 

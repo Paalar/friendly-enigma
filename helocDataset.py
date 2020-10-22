@@ -6,9 +6,9 @@ from torch.utils.data import Dataset
 
 class HELOCDataset(Dataset):
     def __init__(self, dataset: DataFrame):
-        self.values = torch.Tensor(dataset.values)
+        self.values = torch.tensor(dataset.values, dtype=torch.float)
         indexed_labels = list(range(len(dataset.columns)))
-        self.labels = torch.Tensor(indexed_labels)
+        self.labels = torch.tensor(indexed_labels, dtype=torch.float)
 
     def __len__(self):
         return len(self.values)
