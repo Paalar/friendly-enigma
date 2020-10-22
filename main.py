@@ -19,15 +19,22 @@ def read_csv() -> DataFrame:
     return pd.read_csv(CSV_FILE)
 
 def split_predictor(data: DataFrame) -> Tuple[DataFrame, Series]:
+    data.loc[data['RiskPerformance'] == 'Bad'] = 0 # Normalize predictor values before popping column
+    data.loc[data['RiskPerformance'] == 'Good'] = 1
     return data, data.pop('RiskPerformance')
+
+def tensor_predictor(data: Series) -> torch.Tensor:
+    data = data.reset_index(drop=True) # Resets index and removes the Index column
+    data = torch.Tensor(data)
+    return data
 
 def setup(dataset: DataFrame) -> Tuple[Tuple[DataLoader, Series], Tuple[DataLoader, Series]]:
     # Read and split data
     dataset_length = len(dataset.values)
-    dataset_validate, validate_predictor = split_predictor(dataset[:dataset_length//VALIDATION_SIZE])
     dataset_train, train_predictor = split_predictor(dataset[dataset_length//VALIDATION_SIZE:])
-    train_predictor = train_predictor.reset_index(drop=True)
-    validate_predictor = validate_predictor.reset_index(drop=True)
+    dataset_validate, validate_predictor = split_predictor(dataset[:dataset_length//VALIDATION_SIZE])
+    train_predictor = tensor_predictor(train_predictor)
+    validate_predictor = tensor_predictor(validate_predictor)
 
     # Instantiate DataSets
     HELOC_validate = HELOCDataset(dataset_validate)
