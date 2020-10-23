@@ -1,4 +1,4 @@
-# friendly-enigma
+# Friendly-Enigma
 An attempt at using the HELOC-dataset with a multitask-learner to predict RiskPerformance as well as outputting a SHAPley-style feature analysis explanation.
 
 ## Setup
@@ -7,7 +7,7 @@ Place it in the project source folder.
 
 ## Run
 ```bash
-pip -r requirements.txt
+poetry install
 
-python main.py
+poetry run python main.py
 ```
