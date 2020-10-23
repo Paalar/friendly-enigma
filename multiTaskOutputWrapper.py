@@ -6,6 +6,8 @@ from torch import nn, optim
 from typing import Tuple
 from model import Net
 
+from print_colors import print_git_diff
+
 class MultiTaskOutputWrapper(pl.LightningModule):
     def __init__(self, model_core: Net, input_length: int, output_length: Tuple[int, int]):
         super(MultiTaskOutputWrapper, self).__init__() # Not sure what this does
@@ -19,20 +21,24 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         rest_output = self.rest_of_model(data_input)
 
         # Heads
+        #prediction = F.softmax(rest_output, dim=1)
         prediction = self.prediction_head(rest_output)
-        print(f"Prediction head - {prediction}")
+        # print("After last layer:", prediction)
+        prediction = torch.sigmoid(prediction)
+        # print("After sigmoid:", prediction)
+        #print(f"Prediction head - {prediction}")
         # explanation = self.explanation_head(rest_output)
-        prediction = F.sigmoid(prediction)
-        #print(f"Prediction softmax - {prediction}")
+        # print(f"Prediction softmax - {prediction}")
         # explanation = F.softmax(explanation, dim=-1)
         return prediction
 
     def training_step(self, batch, _):
         values, correct_label = batch
         prediction = self(values)
-        prediction = torch.round(prediction)
-        # print(f"Expected {prediction} to be {correct_label}")
+        #criterion = nn.BCEWithLogitsLoss()
+        print_git_diff(prediction, correct_label)
         loss = F.binary_cross_entropy(prediction, correct_label)
+        #loss = criterion(prediction, correct_label)
         # print(f"Criterion - {loss}")
         self.log('training_loss', loss)
         return loss
@@ -40,9 +46,9 @@ class MultiTaskOutputWrapper(pl.LightningModule):
     def validation_step(self, batch, _):
         values, correct_label = batch
         prediction = self(values)
-        prediction = torch.round(prediction)
+        # print(f"Expected {prediction} to be {correct_label}")
         loss = F.binary_cross_entropy(prediction, correct_label)
         self.log('validation_loss', loss)
 
     def configure_optimizers(self):
-        return optim.Adam(self.parameters(), lr=0.01)
+        return optim.Adagrad(self.parameters(), lr=1)

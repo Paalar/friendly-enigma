@@ -25,8 +25,8 @@ def setup(dataset: DataFrame) -> Tuple[DataLoader, DataLoader]:
     # Instantiate DataSets
     HELOC_validate = HELOCDataset(dataset[:dataset_length//VALIDATION_SIZE])
     HELOC_train = HELOCDataset(dataset[dataset_length//VALIDATION_SIZE:])
-    train_loader = DataLoader(HELOC_train, num_workers=6)
-    validate_loader = DataLoader(HELOC_validate)
+    train_loader = DataLoader(HELOC_train, num_workers=4, batch_size=512, shuffle=True)
+    validate_loader = DataLoader(HELOC_validate, num_workers=4, batch_size=512)
     return train_loader, validate_loader
 
 def main():
