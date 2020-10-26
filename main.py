@@ -13,7 +13,7 @@ from helocDataset import HELOCDataset
 from model import Net
 from multiTaskOutputWrapper import MultiTaskOutputWrapper
 
-VALIDATION_SIZE = 3
+VALIDATION_SIZE = 2
 CSV_FILE = "./heloc_dataset_v1.csv"
 
 def read_csv() -> DataFrame:
@@ -24,26 +24,33 @@ def setup(dataset: DataFrame) -> Tuple[DataLoader, DataLoader]:
     dataset_length = len(dataset.values)
 
     # Instantiate DataSets
-    HELOC_validate = HELOCDataset(dataset[:dataset_length//VALIDATION_SIZE])
-    HELOC_train = HELOCDataset(dataset[dataset_length//VALIDATION_SIZE:])
-    train_loader = DataLoader(HELOC_train, num_workers=4, batch_size=512, shuffle=True)
-    validate_loader = DataLoader(HELOC_validate, num_workers=4, batch_size=512)
-    return train_loader, validate_loader
+    training_split = dataset[:dataset_length//VALIDATION_SIZE]
+    HELOC_train = HELOCDataset(training_split)
+    train_loader = DataLoader(HELOC_train, num_workers=8, batch_size=64)
+
+    confirmation_split = dataset[dataset_length//VALIDATION_SIZE:]
+    test_split = confirmation_split[:len(confirmation_split)//VALIDATION_SIZE]
+    HELOC_test = HELOCDataset(test_split)
+    test_loader = DataLoader(HELOC_test, num_workers=8, batch_size=64)
+
+    validate_split = confirmation_split[len(confirmation_split)//VALIDATION_SIZE:]
+    HELOC_validate = HELOCDataset(validate_split)
+    validate_loader = DataLoader(HELOC_validate, num_workers=8, batch_size=64)
+    return train_loader, validate_loader, test_loader
 
 def main():
     heloc_dataset = read_csv()
-    train_loader, validate_loader = setup(heloc_dataset)
+    train_loader, validate_loader, test_loader = setup(heloc_dataset)
     logger = TensorBoardLogger('lightning_logs')
     # Instantiate model
-    nodes_before_split = 50
+    nodes_before_split = 64
     input_length = len(train_loader.dataset[0][0])
     net = Net(input_length=input_length, output_length=nodes_before_split)
     model = MultiTaskOutputWrapper(model_core=net, input_length=nodes_before_split, output_length=(1,1))
-    logger.experiment.add_graph(model, train_loader.dataset[0][0].unsqueeze(0))
-    trainer = pl.Trainer(max_epochs=5)
-    trainer.fit(model, train_loader)
-    trainer.test(model, validate_loader)
-    # trainer.run_evaluation()
+    logger.experiment.add_graph(model, train_loader.dataset[0][0].unsqueeze(0)) # Add model graph to Tensorboarf
+    trainer = pl.Trainer(max_epochs=150)
+    trainer.fit(model, train_loader, validate_loader)
+    trainer.test(model,test_loader)
 
 
 if __name__ == "__main__":
