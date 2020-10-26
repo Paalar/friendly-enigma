@@ -14,14 +14,11 @@ class Net(nn.Module):
     def forward(self, data_input):
         input_layer = self.input_layer(data_input)
         activation_input = F.relu(input_layer)
-        normalized_input = activation_input
 
-        hidden_1 = self.hidden_1(normalized_input)
+        hidden_1 = self.hidden_1(activation_input)
         activation_1 = F.relu(hidden_1)
-        normalized_1 = activation_1
-        dropped = self.dropout(normalized_1)
+        dropped = self.dropout(activation_1)
 
         last_hidden = self.hidden_2(dropped)
         activation_last = F.relu(last_hidden)
-        normalized_last = activation_last
-        return normalized_last
+        return activation_last
