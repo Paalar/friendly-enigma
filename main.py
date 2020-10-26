@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from pandas import DataFrame
 from typing import Tuple
+from pytorch_lightning.loggers import TensorBoardLogger
 
 # Project imports
 from helocDataset import HELOCDataset
@@ -32,14 +33,16 @@ def setup(dataset: DataFrame) -> Tuple[DataLoader, DataLoader]:
 def main():
     heloc_dataset = read_csv()
     train_loader, validate_loader = setup(heloc_dataset)
-
+    logger = TensorBoardLogger('lightning_logs')
     # Instantiate model
     nodes_before_split = 50
     input_length = len(train_loader.dataset[0][0])
     net = Net(input_length=input_length, output_length=nodes_before_split)
     model = MultiTaskOutputWrapper(model_core=net, input_length=nodes_before_split, output_length=(1,1))
-    trainer = pl.Trainer(max_epochs=10)
-    trainer.fit(model, train_loader, validate_loader)
+    logger.experiment.add_graph(model, train_loader.dataset[0][0].unsqueeze(0))
+    trainer = pl.Trainer(max_epochs=5)
+    trainer.fit(model, train_loader)
+    trainer.test(model, validate_loader)
     # trainer.run_evaluation()
 
 

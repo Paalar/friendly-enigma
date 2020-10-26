@@ -11,11 +11,13 @@ from print_colors import print_git_diff
 class MultiTaskOutputWrapper(pl.LightningModule):
     def __init__(self, model_core: Net, input_length: int, output_length: Tuple[int, int]):
         super(MultiTaskOutputWrapper, self).__init__() # Not sure what this does
+        self.accuracy = pl.metrics.Accuracy()
         self.rest_of_model = model_core
 
         # Heads
         self.prediction_head = nn.Linear(input_length, output_length[0])
         self.explanation_head = nn.Linear(input_length, output_length[1])
+
 
     def forward(self, data_input):
         rest_output = self.rest_of_model(data_input)
@@ -36,19 +38,30 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         values, correct_label = batch
         prediction = self(values)
         #criterion = nn.BCEWithLogitsLoss()
-        print_git_diff(prediction, correct_label)
-        loss = F.binary_cross_entropy(prediction, correct_label)
+        loss = F.mse_loss(prediction, correct_label)
         #loss = criterion(prediction, correct_label)
-        # print(f"Criterion - {loss}")
-        self.log('training_loss', loss)
+        self.log('Loss/train', loss)
+        self.log('Accuracy/train-step', self.accuracy(prediction, correct_label))
         return loss
+    def training_epoch_end(self, outs):
+        # Log epoch metric
+        self.log("Accuracy/train-epoch", self.accuracy.compute())
 
     def validation_step(self, batch, _):
         values, correct_label = batch
         prediction = self(values)
         # print(f"Expected {prediction} to be {correct_label}")
-        loss = F.binary_cross_entropy(prediction, correct_label)
-        self.log('validation_loss', loss)
+        loss = F.mse_loss(prediction, correct_label)
+        self.log('Loss/validate', loss)
+    
+    def test_step(self,batch, _):
+        values, correct_label = batch
+        prediction = self(values)
+        loss = F.mse_loss(prediction, correct_label)
+        self.log('Accuracy/test-step', self.accuracy(prediction, correct_label))
+        self.log('Accuracy/test-epoch', self.accuracy.compute())
+        self.log('Loss/test', loss)
+
 
     def configure_optimizers(self):
-        return optim.Adagrad(self.parameters(), lr=1)
+        return optim.Adagrad(self.parameters(), lr=0.01)
