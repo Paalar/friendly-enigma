@@ -11,10 +11,18 @@ from print_colors import print_git_diff
 class MultiTaskOutputWrapper(pl.LightningModule):
     def __init__(self, model_core: Net, input_length: int, output_length: Tuple[int, int]):
         super(MultiTaskOutputWrapper, self).__init__() # Not sure what this does
+
+        # Metrics
         self.accuracy = pl.metrics.Accuracy()
-        self.own_precision = pl.metrics.Precision()
-        self.rest_of_model = model_core
+        self.own_precision = pl.metrics.Precision() # Named because Trainer would try to overwrite own precision metric.
+        self.recall = pl.metrics.Recall()
+        self.fbeta = pl.metrics.Fbeta()
+
+        # Hyperparameters
         self.learning_rate = 0.01
+
+        # Pre-split model
+        self.rest_of_model = model_core
 
         # Heads
         self.prediction_head = nn.Linear(input_length, output_length[0])
@@ -36,14 +44,12 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         prediction = self(values)
         loss = F.mse_loss(prediction, correct_label)
         self.log('Loss/train', loss)
-        self.log('Accuracy/train-step', self.accuracy(prediction, correct_label))
-        self.log('Precision/train-step', self.own_precision(prediction, correct_label))
+        self.metrics_update("train-step", prediction, correct_label)
         return loss
 
     def training_epoch_end(self, outs):
         # Log epoch metric
-        self.log("Accuracy/train-epoch", self.accuracy.compute())
-        self.log('Precision/train-epoch', self.own_precision.compute())
+        self.metrics_compute("train-epoch")
 
     def validation_step(self, batch, _):
         values, correct_label = batch
@@ -55,13 +61,24 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         values, correct_label = batch
         prediction = self(values)
         loss = F.mse_loss(prediction, correct_label)
-        self.log('Accuracy/test-step', self.accuracy(prediction, correct_label))
-        self.log('Precision/test-step', self.own_precision(prediction, correct_label))
+        self.metrics_update("test-step", prediction, correct_label)
         self.log('Loss/test', loss)
 
     def test_epoch_end(self, outs):
-        self.log('Accuracy/test-epoch', self.accuracy.compute())
-        self.log('Precision/test-epoch', self.own_precision.compute())
+        self.metrics_compute("test-epoch")
 
     def configure_optimizers(self):
         return optim.Adagrad(self.parameters(), lr=self.learning_rate)
+
+    def metrics_compute(self, label):
+        self.log(f"Accuracy/{label}", self.accuracy.compute())
+        self.log(f"Precision/{label}", self.own_precision.compute())
+        self.log(f"Recall/{label}", self.recall.compute())
+        self.log(f"Fbeta/{label}", self.fbeta.compute())
+
+    def metrics_update(self, label, prediction, correct_label):
+        self.log(f"Accuracy/{label}", self.accuracy(prediction, correct_label))
+        self.log(f"Precision/{label}", self.own_precision(prediction, correct_label))
+        self.log(f"Recall/{label}", self.recall(prediction, correct_label))
+        self.log(f"Fbeta/{label}", self.fbeta(prediction, correct_label))
+
