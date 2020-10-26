@@ -40,8 +40,9 @@ def main():
     net = Net(input_length=input_length, output_length=nodes_before_split)
     model = MultiTaskOutputWrapper(model_core=net, input_length=nodes_before_split, output_length=(1,1))
     logger.experiment.add_graph(model, train_loader.dataset[0][0].unsqueeze(0))
-    trainer = pl.Trainer(max_epochs=50)
+    trainer = pl.Trainer(max_epochs=5)
     trainer.fit(model, train_loader)
+    trainer.test(model, validate_loader)
     # trainer.run_evaluation()
 
 

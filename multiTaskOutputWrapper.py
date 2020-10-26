@@ -53,6 +53,15 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         # print(f"Expected {prediction} to be {correct_label}")
         loss = F.mse_loss(prediction, correct_label)
         self.log('Loss/validate', loss)
+    
+    def test_step(self,batch, _):
+        values, correct_label = batch
+        prediction = self(values)
+        loss = F.mse_loss(prediction, correct_label)
+        self.log('Accuracy/test-step', self.accuracy(prediction, correct_label))
+        self.log('Accuracy/test-epoch', self.accuracy.compute())
+        self.log('Loss/test', loss)
+
 
     def configure_optimizers(self):
         return optim.Adagrad(self.parameters(), lr=0.01)
