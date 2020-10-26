@@ -42,15 +42,19 @@ def setup(dataset: DataFrame) -> Tuple[DataLoader, DataLoader]:
 def main():
     heloc_dataset = read_csv()
     train_loader, validate_loader, test_loader = setup(heloc_dataset)
-    comet_logger = CometLogger(api_key=os.environ.get('COMET_API_KEY'), project_name='master-jk-pl')
-    tensorboard_logger = TensorBoardLogger('lightning_logs')
+    api_key = os.environ.get('COMET_API_KEY')
+    logger = TensorBoardLogger('lightning_logs')
+    if api_key:
+        logger = CometLogger(api_key=api_key, project_name='master-jk-pl')
+    else:
+        print("No Comet-API-key found, defaulting to Tensorboard", flush=True)
     # Instantiate model
     nodes_before_split = 64
     input_length = len(train_loader.dataset[0][0])
     net = Net(input_length=input_length, output_length=nodes_before_split)
     model = MultiTaskOutputWrapper(model_core=net, input_length=nodes_before_split, output_length=(1,1))
     tensorboard_logger.experiment.add_graph(model, train_loader.dataset[0][0].unsqueeze(0)) # Add model graph to Tensorboarf
-    trainer = pl.Trainer(max_epochs=150, logger=comet_logger)
+    trainer = pl.Trainer(max_epochs=150, logger=logger)
     trainer.fit(model, train_loader, validate_loader)
     trainer.test(model,test_loader)
 
