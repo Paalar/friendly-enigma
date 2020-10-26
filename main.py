@@ -50,7 +50,6 @@ def main():
         logger = CometLogger(api_key=api_key, project_name='master-jk-pl')
     else:
         print("No Comet-API-key found, defaulting to Tensorboard", flush=True)
-        logger.experiment.add_graph(model, train_loader.dataset[0][0].unsqueeze(0)) # Add model graph to Tensorboarf
 
     # Instantiate model
     nodes_before_split = 64
@@ -60,7 +59,6 @@ def main():
     trainer = pl.Trainer(max_epochs=150, logger=logger)
     trainer.fit(model, train_loader, validate_loader)
     trainer.test(model,test_loader)
-
 
 if __name__ == "__main__":
     main()
