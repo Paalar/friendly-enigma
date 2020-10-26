@@ -42,12 +42,15 @@ def setup(dataset: DataFrame) -> Tuple[DataLoader, DataLoader]:
 def main():
     heloc_dataset = read_csv()
     train_loader, validate_loader, test_loader = setup(heloc_dataset)
+
+    # Configure logging
     api_key = os.environ.get('COMET_API_KEY')
     logger = TensorBoardLogger('lightning_logs')
     if api_key:
         logger = CometLogger(api_key=api_key, project_name='master-jk-pl')
     else:
         print("No Comet-API-key found, defaulting to Tensorboard", flush=True)
+
     # Instantiate model
     nodes_before_split = 64
     input_length = len(train_loader.dataset[0][0])
