@@ -7,6 +7,7 @@ import os
 from pandas import DataFrame
 from typing import Tuple
 from pytorch_lightning.loggers import CometLogger, TensorBoardLogger
+from datetime import datetime
 
 # Project imports
 from model import Net
@@ -20,8 +21,13 @@ def main():
     # Configure logging
     api_key = os.environ.get('COMET_API_KEY')
     logger = TensorBoardLogger('lightning_logs')
+    today = datetime.today()
     if api_key:
-        logger = CometLogger(api_key=api_key, project_name='master-jk-pl')
+        logger = CometLogger(
+            api_key=api_key,
+            project_name='master-jk-pl',
+            experiment_name=today.strftime("%d/%m/%y - %H:%M")
+        )
     else:
         print("No Comet-API-key found, defaulting to Tensorboard", flush=True)
 
