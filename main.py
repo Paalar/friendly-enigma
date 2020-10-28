@@ -26,7 +26,7 @@ def main():
         logger = CometLogger(
             api_key=api_key,
             project_name='master-jk-pl',
-            experiment_name=today.strftime("%d/%m/%y - %H:%M")
+            experiment_name=today.strftime("%y/%m/%d - %H:%M")
         )
     else:
         print("No Comet-API-key found, defaulting to Tensorboard", flush=True)
