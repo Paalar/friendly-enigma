@@ -4,8 +4,6 @@
 
 ### HELOC
 heloc_data_dictionary-2.xlsx
-heloc_dataset_v1.csv
-heloc_dataset_pruned.csv
 
 
 ### Linux ###
@@ -233,3 +231,7 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,windows,linux,visualstudiocode
 
 lightning_logs/*
+comet-default/*
+master-jk-pl/*
+checkpoints/*
+*.csv
