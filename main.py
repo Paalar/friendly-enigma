@@ -6,7 +6,9 @@ import os
 # Subpackage
 from pandas import DataFrame
 from typing import Tuple
+from datetime import datetime
 from pytorch_lightning.loggers import CometLogger, TensorBoardLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 # Project imports
 from model import Net
@@ -30,9 +32,19 @@ def main():
     input_length = data_module.row_length
     net = Net(input_length=input_length, output_length=nodes_before_split)
     model = MultiTaskOutputWrapper(model_core=net, input_length=nodes_before_split, output_length=(1,1))
-    trainer = pl.Trainer(max_epochs=150, logger=logger)
+    checkpoint_callback = ModelCheckpoint(
+        monitor="loss_validate", 
+        save_top_k=3,
+        dirpath=f"./checkpoints/{datetime.now().isoformat()}",
+        filename="heloc-{epoch:02d}-{loss_validate:.2f}",
+        )
+    trainer = pl.Trainer(
+        max_epochs=13,
+        logger=logger,
+        checkpoint_callback=checkpoint_callback)
     trainer.fit(model, data_module)
     trainer.test(model, datamodule=data_module)
+
 
 if __name__ == "__main__":
     main()

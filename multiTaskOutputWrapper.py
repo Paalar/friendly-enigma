@@ -10,6 +10,7 @@ from model import Net
 class MultiTaskOutputWrapper(pl.LightningModule):
     def __init__(self, model_core: Net, input_length: int, output_length: Tuple[int, int]):
         super(MultiTaskOutputWrapper, self).__init__() # Not sure what this does
+        self.save_hyperparameters()
 
         # Metrics
         self.accuracy = pl.metrics.Accuracy()
@@ -63,7 +64,7 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         prediction, explanation = self(values)
         loss_prediction = self.calculate_loss(prediction, correct_label, 0)
         loss_explanation = self.calculate_loss(explanation, correct_label, 1)
-        self.log('Loss/validate', loss_prediction)
+        self.log('loss_validate', loss_prediction)
         return loss_prediction+loss_explanation
 
     def test_step(self,batch, _):
