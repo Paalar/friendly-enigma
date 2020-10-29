@@ -11,7 +11,7 @@ from pytorch_lightning.loggers import CometLogger, TensorBoardLogger
 # Project imports
 from model import Net
 from multiTaskOutputWrapper import MultiTaskOutputWrapper
-from helocDataModule import HelocDataModule
+from data.helocDataModule import HelocDataModule
 
 def main():
     data_module = HelocDataModule()

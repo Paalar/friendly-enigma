@@ -6,7 +6,6 @@ from torch import nn, optim
 from typing import Tuple
 from model import Net
 
-from print_colors import print_git_diff
 
 class MultiTaskOutputWrapper(pl.LightningModule):
     def __init__(self, model_core: Net, input_length: int, output_length: Tuple[int, int]):

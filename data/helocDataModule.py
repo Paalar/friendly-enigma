@@ -1,6 +1,7 @@
 import pandas as pd
+import inspect
 from pytorch_lightning import LightningDataModule
-from helocDataset import HELOCDataset
+from .helocDataset import HELOCDataset
 from torch.utils.data import DataLoader
 
 
@@ -13,7 +14,7 @@ class HelocDataModule(LightningDataModule):
         self.batch_size = batch_size
 
     def prepare_data(self):
-        CSV_FILE = "./heloc_dataset_v1.csv"
+        CSV_FILE = "data/heloc_dataset_v1.csv"
         self.data = pd.read_csv(CSV_FILE)
         self.row_length = self.data.shape[1] - 1 # Remove predictor
 
