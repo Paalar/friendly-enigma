@@ -17,6 +17,7 @@ class HelocDataModule(LightningDataModule):
         CSV_FILE = "data/heloc_dataset_v1.csv"
         self.data = pd.read_csv(CSV_FILE)
         self.row_length = self.data.shape[1] - 1 # Remove predictor
+        self.labels = self.data.columns[1:]
 
     def setup(self, step):
         # step is either 'fit' or 'test', can be used to read only necessary data.
