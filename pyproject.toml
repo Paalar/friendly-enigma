@@ -10,6 +10,7 @@ torch = "^1.6.0"
 pandas = "^1.1.3"
 pytorch-lightning = "^1.0.4"
 comet-ml = "^3.2.5"
+edc = {git = "https://github.com/FluidSense/edc.git"}
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
