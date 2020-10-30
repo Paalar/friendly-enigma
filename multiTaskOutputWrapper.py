@@ -43,7 +43,7 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
         explanation = torch.sigmoid(explanation)
-        return prediction, explanation
+        return prediction #, explanation
 
     def training_step(self, batch, _):
         values, correct_label = batch
