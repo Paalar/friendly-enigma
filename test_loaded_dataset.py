@@ -29,26 +29,38 @@ def classifier_fn(instance):
     prediction = model(tensor)
     return prediction.detach().numpy()
 
-batch = next(iter(data_module.train_dataloader()))
-values, preds = batch
-value_idx = values[0]
-print(value_idx)
-print(value_idx.dim())
+train_dataloader = data_module.train_dataloader()
+validate_dataloader = data_module.val_dataloader()
+test_dataloader = data_module.test_dataloader()
+
+loaders = [train_dataloader, validate_dataloader, test_dataloader]
+
+predictions = []
+for loader in loaders:
+    for batch in iter(loader):
+        values, preds = batch
+        value_idx = values
+
+        prediction = model(value_idx).detach()
+        prediction = torch.flatten(prediction)
+        predictions += prediction
+
 # Explain: The rest of the fucking master
 sedc_explainer = SEDC_Explainer(
     feature_names = np.array(data_module.labels),
-    threshold_classifier = np.percentile(value_idx.unsqueeze(0), 75),
+    threshold_classifier = np.percentile(predictions, 75),
     classifier_fn = classifier_fn,
+    silent = True
 )
-sedc_explainer.explanation(value_idx.unsqueeze(0))
 
+explanations = []
+for loader in loaders:
+    for batch in iter(loader):
+        values, _ = batch
+        for value in values:
+            explanation = sedc_explainer.explanation(value)
+            explanations.append(explanation)
 
-
-"""
-explainer = shap.DeepExplainer(model, values)
-next_batch = next(iter(data_module.test_dataloader()))
-explain_values, _ = next_batch
-explanation = explainer.shap_values(explain_values[0].unsqueeze(0))
-#pandas.set_option("display.max_rows", None, "display.max_columns", None)
-print(pandas.DataFrame(explanation, columns=data_module.labels))
-"""
+    
+df = pandas.DataFrame(explanations)
+df.to_csv("data/explanations.csv")

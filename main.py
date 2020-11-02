@@ -36,7 +36,7 @@ def main():
     nodes_before_split = 64
     input_length = data_module.row_length
     net = Net(input_length=input_length, output_length=nodes_before_split)
-    model = MultiTaskOutputWrapper(model_core=net, input_length=nodes_before_split, output_length=(1,1))
+    model = MultiTaskOutputWrapper(model_core=net, input_length=nodes_before_split, output_length=(1,len(data_module.labels)))
     checkpoint_callback = ModelCheckpoint(
         monitor="loss_validate", 
         save_top_k=3,
