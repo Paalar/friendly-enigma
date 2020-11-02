@@ -130,7 +130,7 @@ watch = ["pyinotify"]
 
 [[package]]
 name = "edc"
-version = "0.1.3"
+version = "0.2.1"
 description = "Search for Evidence Counterfactuals"
 category = "main"
 optional = false
@@ -143,7 +143,7 @@ ordered-set = ">=4.0.2,<5.0.0"
 type = "git"
 url = "https://github.com/FluidSense/edc.git"
 reference = "master"
-resolved_reference = "cbe4b7c048e02517ed419bcedc531fd5b0a7c27f"
+resolved_reference = "cfabb535c6a720ba3d5eeb1b1b7cea10dae501bc"
 
 [[package]]
 name = "everett"
