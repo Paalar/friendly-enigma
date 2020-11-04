@@ -8,13 +8,17 @@ from model import Net
 
 
 class MultiTaskOutputWrapper(pl.LightningModule):
-    def __init__(self, model_core: Net, input_length: int, output_length: Tuple[int, int]):
-        super(MultiTaskOutputWrapper, self).__init__() # Not sure what this does
+    def __init__(
+        self, model_core: Net, input_length: int, output_length: Tuple[int, int]
+    ):
+        super(MultiTaskOutputWrapper, self).__init__()  # Not sure what this does
         self.save_hyperparameters()
 
         # Metrics
         self.accuracy = pl.metrics.Accuracy()
-        self.own_precision = pl.metrics.Precision() # Named because Trainer would try to overwrite own precision metric.
+        self.own_precision = (
+            pl.metrics.Precision()
+        )  # Named because Trainer would try to overwrite own precision metric.
         self.recall = pl.metrics.Recall()
         self.fbeta = pl.metrics.Fbeta()
 
@@ -32,8 +36,10 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         self.explanation_head = nn.Linear(input_length, output_length[1])
 
         # Loss functions per head
-        self.loss_functions = [F.mse_loss, F.binary_cross_entropy]
-
+        self.loss_functions = [
+            F.mse_loss,
+            F.mse_loss,
+        ]
 
     def forward(self, data_input):
         rest_output = self.rest_of_model(data_input)
@@ -43,37 +49,39 @@ class MultiTaskOutputWrapper(pl.LightningModule):
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
         explanation = torch.sigmoid(explanation)
-        return prediction #, explanation
+        return prediction, explanation
 
     def training_step(self, batch, _):
-        values, correct_label = batch
+        values, prediction_label, explanation_label = batch
         prediction, explanation = self(values)
-        loss_prediction = self.calculate_loss(prediction, correct_label, 0)
-        loss_explanation = self.calculate_loss(explanation, correct_label, 1)
-        self.log('Loss/train-prediction', loss_prediction)
-        self.log('Loss/train-explanation', loss_explanation)
-        self.metrics_update("train-step", prediction, correct_label)
-        return loss_prediction+loss_explanation
+        loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
+        loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
+        self.log("Loss/train-prediction", loss_prediction)
+        self.log("Loss/train-explanation", loss_explanation)
+        self.metrics_update("train-step", prediction, prediction_label)
+        return loss_prediction + loss_explanation
 
     def training_epoch_end(self, outs):
         # Log epoch metric
         self.metrics_compute("train-epoch")
 
     def validation_step(self, batch, _):
-        values, correct_label = batch
+        values, prediction_label, explanation_label = batch
+        print(values)
         prediction, explanation = self(values)
-        loss_prediction = self.calculate_loss(prediction, correct_label, 0)
-        loss_explanation = self.calculate_loss(explanation, correct_label, 1)
-        self.log('loss_validate', loss_prediction)
-        return loss_prediction+loss_explanation
+        loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
+        loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
+        self.log("loss_validate", loss_prediction)
+        return loss_prediction + loss_explanation
 
-    def test_step(self,batch, _):
-        values, correct_label = batch
+    def test_step(self, batch, _):
+        values, prediction_label, explanation_label = batch
         prediction, explanation = self(values)
-        loss_prediction = self.calculate_loss(prediction, correct_label, 0)
-        loss_explanation = self.calculate_loss(explanation, correct_label, 1)
-        self.metrics_update("test-step", prediction, correct_label)
-        self.log('Loss/test', loss_prediction)
+        loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
+        # loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
+        self.metrics_update("test-step", prediction, prediction_label)
+        self.metrics_update("test-step", explanation, explanation_label)
+        self.log("Loss/test", loss_prediction)
 
     def test_epoch_end(self, outs):
         self.metrics_compute("test-epoch")
