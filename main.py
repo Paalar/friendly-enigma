@@ -1,8 +1,8 @@
-from single_task_learner import SingleTaskLearner
-from multi_task_learner import MultiTaskLearner
+from runners.STL_runner import STLRunner
+from runners.MTL_runner import MTLRunner
 
 def main():
-    learner = MultiTaskLearner()
+    learner = STLRunner()
     learner.run()
 
 if __name__ == "__main__":

@@ -8,14 +8,14 @@ import numpy as np
 from pytorch_lightning import Trainer
 from edc.sedc_agnostic.sedc_algorithm import SEDC_Explainer 
 
-from singleTaskOutputWrapper import SingleTaskOutputWrapper
+from models.singleTaskLearner import SingleTaskLearner
 from data.helocDataModule import HelocDataModule
-from model import Net
+from models.multiTaskLearner import Net
 # Load the model
 parser = argparse.ArgumentParser(description="Load and evaluate a saved model")
 parser.add_argument("checkpoint", type=str, help="File path to load")
 args = parser.parse_args()
-model = SingleTaskOutputWrapper.load_from_checkpoint(args.checkpoint)
+model = SingleTaskLearner.load_from_checkpoint(args.checkpoint)
 
 # Test the model
 data_module = HelocDataModule()

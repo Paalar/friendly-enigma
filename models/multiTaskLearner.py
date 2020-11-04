@@ -4,14 +4,14 @@ import torch
 
 from torch import nn, optim
 from typing import Tuple
-from model import Net
+from models.core_model import Net
 
 
-class MultiTaskOutputWrapper(pl.LightningModule):
+class MultiTaskLearner(pl.LightningModule):
     def __init__(
         self, model_core: Net, input_length: int, output_length: Tuple[int, int]
     ):
-        super(MultiTaskOutputWrapper, self).__init__()  # Not sure what this does
+        super(MultiTaskLearner, self).__init__()  # Not sure what this does
         self.save_hyperparameters()
 
         # Metrics

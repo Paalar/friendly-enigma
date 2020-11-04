@@ -6,12 +6,12 @@ from datetime import datetime
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 # Project imports
-from model import Net
-from singleTaskOutputWrapper import SingleTaskOutputWrapper
+from models.core_model import Net
+from models.singleTaskLearner import SingleTaskLearner
 from data.helocDataModule import HelocDataModule
 import dashboard
 
-class SingleTaskLearner():
+class STLRunner():
     def __init__(self, nodes_before_split=64, max_epochs=13, data_module = HelocDataModule()):
         self.max_epochs=max_epochs
         self.nodes_before_split=nodes_before_split
@@ -20,7 +20,7 @@ class SingleTaskLearner():
         self.data_module.prepare_data()
         input_length=self.data_module.row_length
         self.model_core = Net(input_length=input_length, output_length=nodes_before_split)
-        self.model = SingleTaskOutputWrapper(
+        self.model = SingleTaskLearner(
             model_core=self.model_core,
             input_length=nodes_before_split,
             output_length=1,
