@@ -39,14 +39,17 @@ class SingleTaskLearner(pl.LightningModule):
 
     def forward(self, data_input):
         rest_output = self.rest_of_model(data_input)
-
         prediction = self.prediction_head(rest_output)
         prediction = torch.sigmoid(prediction)
         return prediction
 
-    def training_step(self, batch, _):
+    def predict_batch(self, batch):
         values, prediction_label = batch
         prediction = self(values)
+        return prediction, prediction_label
+
+    def training_step(self, batch, _):
+        prediction, prediction_label = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         self.log("Loss/train-prediction", loss_prediction)
         self.metrics_update("train-step", prediction, prediction_label)
@@ -57,15 +60,13 @@ class SingleTaskLearner(pl.LightningModule):
         self.metrics_compute("train-epoch")
 
     def validation_step(self, batch, _):
-        values, prediction_label = batch
-        prediction = self(values)
+        prediction, prediction_label = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         self.log("loss_validate", loss_prediction)
         return loss_prediction
 
     def test_step(self, batch, _):
-        values, prediction_label = batch
-        prediction = self(values)
+        prediction, prediction_label = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         self.metrics_update("test-step", prediction, prediction_label)
         self.log("Loss/test", loss_prediction)
