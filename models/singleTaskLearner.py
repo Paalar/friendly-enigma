@@ -3,7 +3,6 @@ import pytorch_lightning as pl
 import torch
 
 from torch import nn, optim
-from typing import Tuple
 from models.core_model import Net
 
 

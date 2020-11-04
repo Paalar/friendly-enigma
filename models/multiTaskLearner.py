@@ -1,8 +1,7 @@
 import torch.nn.functional as F
-import pytorch_lightning as pl
 import torch
 
-from torch import nn, optim
+from torch import nn
 from typing import Tuple
 from models.core_model import Net
 from models.singleTaskLearner import SingleTaskLearner
