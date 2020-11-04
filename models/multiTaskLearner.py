@@ -1,21 +1,23 @@
 import torch.nn.functional as F
 import torch
 
-from torch import nn
+from torch import nn, optim
 from typing import Tuple
 from models.core_model import Net
-from models.singleTaskLearner import SingleTaskLearner
+from models.genericLearner import GenericLearner
 
-class MultiTaskLearner(SingleTaskLearner):
+class MultiTaskLearner(GenericLearner):
     def __init__(self, model_core: Net, input_length: int, output_length: Tuple[int, int]):
-        super(MultiTaskLearner, self).__init__(model_core=model_core, input_length=input_length, output_length=output_length[0])
+        super(MultiTaskLearner, self).__init__(heads=2, model_core=model_core)
+        # Hyperparameters
+        self.learning_rate = 0.01
+        # https://towardsdatascience.com/multi-task-learning-with-pytorch-and-fastai-6d10dc7ce855
         self.log_vars = nn.Parameter(torch.zeros((2)))
+        # Heads
         self.prediction_head = nn.Linear(input_length, output_length[0])
         self.explanation_head = nn.Linear(input_length, output_length[1])
-        self.loss_functions = [
-            self.loss_function,
-            F.mse_loss,
-        ]
+        # Loss functions per head
+        self.loss_functions = [F.mse_loss, F.mse_loss]
 
     def forward(self, data_input):
         rest_output = self.rest_of_model(data_input)
@@ -44,6 +46,7 @@ class MultiTaskLearner(SingleTaskLearner):
         loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
         loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
         self.log("loss_validate", loss_prediction)
+        self.log("loss_validate", loss_prediction)
         return loss_prediction + loss_explanation
 
     def test_step(self, batch, _):
@@ -53,6 +56,9 @@ class MultiTaskLearner(SingleTaskLearner):
         self.metrics_update("test-step", prediction, prediction_label)
         self.metrics_update("test-step", explanation, explanation_label)
         self.log("Loss/test", loss_prediction)
+
+    def configure_optimizers(self):
+        return optim.Adagrad(self.parameters(), lr=self.learning_rate)
 
     def calculate_loss(self, prediction, correct_label, head_number):
         loss_function = self.loss_functions[head_number]

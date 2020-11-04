@@ -28,7 +28,7 @@ class STLRunner():
     
     def run(self):
         trainer = pl.Trainer(
-            max_epochs=13, logger=self.logger, checkpoint_callback=create_checkpoint_callback()
+            max_epochs=self.max_epochs, logger=self.logger, checkpoint_callback=create_checkpoint_callback()
         )
         trainer.fit(self.model, self.data_module)
         trainer.test(self.model, datamodule=self.data_module)
