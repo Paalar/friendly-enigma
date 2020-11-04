@@ -6,7 +6,6 @@ class ExplanationDataset(HELOCDataset):
     def __init__(self, dataset):
         dataset, explanations = self.split_explanation_label(dataset)
         self.explanations = explanations
-        print("Explanation", explanations)
         super().__init__(dataset)
         # dataset, predictor = self.split_predictor(dataset)
         # self.predictors = predictor
@@ -22,15 +21,21 @@ class ExplanationDataset(HELOCDataset):
     def split_explanation_label(self, data):
         explanation_label = data.pop("explanation set")
         column_labels = data.columns[1:].tolist()
-        explanation_data = [
-            self.create_explanation_as_ints(
-                column_labels.index(label[3 : len(label) - 3])
-            )
+        labels_as_list_entries = [
+            label[2 : len(label) - 2].replace("'", "").replace(" ", "").split(",")
             for label in explanation_label
+        ]
+        labels_indices = [
+            [column_labels.index(label) for label in label_list]
+            for label_list in labels_as_list_entries
+        ]
+        explanation_data = [
+            self.create_explanation_as_ints(indices) for indices in labels_indices
         ]
         return data, explanation_data
 
-    def create_explanation_as_ints(self, index):
+    def create_explanation_as_ints(self, indices):
         template = torch.zeros([1, 23])
-        template[0][index] = 1
-        return template
+        for index in indices:
+            template[0][index] = 1
+        return template[0]

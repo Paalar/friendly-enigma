@@ -67,7 +67,6 @@ class MultiTaskOutputWrapper(pl.LightningModule):
 
     def validation_step(self, batch, _):
         values, prediction_label, explanation_label = batch
-        print(values)
         prediction, explanation = self(values)
         loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
         loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
