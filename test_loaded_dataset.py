@@ -8,21 +8,19 @@ import numpy as np
 from pytorch_lightning import Trainer
 from edc.sedc_agnostic.sedc_algorithm import SEDC_Explainer 
 
-from multiTaskOutputWrapper import MultiTaskOutputWrapper
+from singleTaskOutputWrapper import SingleTaskOutputWrapper
 from data.helocDataModule import HelocDataModule
 from model import Net
 # Load the model
 parser = argparse.ArgumentParser(description="Load and evaluate a saved model")
 parser.add_argument("checkpoint", type=str, help="File path to load")
-args = parser.parse_args(["checkpoints/2020-10-29T13:23:40.072673/heloc-epoch=12-loss_validate=-0.25.ckpt"])
-model = MultiTaskOutputWrapper.load_from_checkpoint(args.checkpoint)
+args = parser.parse_args()
+model = SingleTaskOutputWrapper.load_from_checkpoint(args.checkpoint)
 
 # Test the model
 data_module = HelocDataModule()
 data_module.prepare_data()
 data_module.setup("train")
-#trainer = Trainer()
-#trainer.test(model, datamodule=data_module)
 
 def classifier_fn(instance):
     tensor = torch.from_numpy(instance.toarray())
