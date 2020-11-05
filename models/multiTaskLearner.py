@@ -12,6 +12,7 @@ class MultiTaskLearner(GenericLearner):
         self, model_core: Net, input_length: int, output_length: Tuple[int, int]
     ):
         super(MultiTaskLearner, self).__init__(heads=2, model_core=model_core)
+        self.save_hyperparameters()
         # Hyperparameters
         self.learning_rate = 0.01
         # https://towardsdatascience.com/multi-task-learning-with-pytorch-and-fastai-6d10dc7ce855

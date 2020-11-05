@@ -1,14 +1,13 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 import pytorch_lightning as pl
 
 from models.core_model import Net
 
 
-class GenericLearner(pl.LightningModule):
+class GenericLearner(pl.LightningModule, ABC):
     def __init__(self, model_core: Net, heads: int = 1):
         super(GenericLearner, self).__init__()
         self.rest_of_model = model_core
-        self.save_hyperparameters()
         metrics = [
             pl.metrics.Accuracy,
             pl.metrics.Precision,
