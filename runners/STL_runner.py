@@ -50,6 +50,6 @@ def create_checkpoint_callback(prefix):
     return ModelCheckpoint(
         monitor="loss_validate",
         save_top_k=3,
-        dirpath=f"./checkpoints/{prefix}-{datetime.now().isoformat()}",
+        dirpath=f"./checkpoints/{prefix}-{datetime.now().strftime('%y-%m-%d-%H:%M:%S')}",
         filename="heloc-{epoch:02d}-{loss_validate:.2f}",
     )
