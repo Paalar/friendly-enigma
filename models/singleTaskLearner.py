@@ -9,7 +9,10 @@ from models.genericLearner import GenericLearner
 
 class SingleTaskLearner(GenericLearner):
     def __init__(self, model_core: Net, input_length: int, output_length: int):
-        super(SingleTaskLearner, self).__init__(model_core=model_core)  # Not sure what this does
+        super(SingleTaskLearner, self).__init__(
+            model_core=model_core
+        )  # Not sure what this does
+        self.save_hyperparameters()
         # Hyperparameters
         self.learning_rate = 0.01
         # https://towardsdatascience.com/multi-task-learning-with-pytorch-and-fastai-6d10dc7ce855
