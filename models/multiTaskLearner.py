@@ -6,8 +6,11 @@ from typing import Tuple
 from models.core_model import Net
 from models.genericLearner import GenericLearner
 
+
 class MultiTaskLearner(GenericLearner):
-    def __init__(self, model_core: Net, input_length: int, output_length: Tuple[int, int]):
+    def __init__(
+        self, model_core: Net, input_length: int, output_length: Tuple[int, int]
+    ):
         super(MultiTaskLearner, self).__init__(heads=2, model_core=model_core)
         # Hyperparameters
         self.learning_rate = 0.01
@@ -33,16 +36,27 @@ class MultiTaskLearner(GenericLearner):
         return prediction, prediction_label, explanation, explanation_label
 
     def training_step(self, batch, _):
-        prediction, prediction_label, explanation, explanation_label = self.predict_batch(batch)
+        (
+            prediction,
+            prediction_label,
+            explanation,
+            explanation_label,
+        ) = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
         loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
         self.log("Loss/train-prediction", loss_prediction)
         self.log("Loss/train-explanation", loss_explanation)
         self.metrics_update("train-step", prediction, prediction_label)
+        self.metrics_update("train-step", prediction, prediction_label, head=1)
         return loss_prediction + loss_explanation
 
     def validation_step(self, batch, _):
-        prediction, prediction_label, explanation, explanation_label = self.predict_batch(batch)
+        (
+            prediction,
+            prediction_label,
+            explanation,
+            explanation_label,
+        ) = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
         loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
         self.log("loss_validate", loss_prediction)
@@ -50,11 +64,16 @@ class MultiTaskLearner(GenericLearner):
         return loss_prediction + loss_explanation
 
     def test_step(self, batch, _):
-        prediction, prediction_label, explanation, explanation_label = self.predict_batch(batch)
+        (
+            prediction,
+            prediction_label,
+            explanation,
+            explanation_label,
+        ) = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
         loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
         self.metrics_update("test-step", prediction, prediction_label)
-        self.metrics_update("test-step", explanation, explanation_label)
+        self.metrics_update("test-step", explanation, explanation_label, head=1)
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
