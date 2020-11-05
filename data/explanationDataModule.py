@@ -15,7 +15,6 @@ class ExplanationDataModule(HelocDataModule):
         explanation_data = pd.read_csv(EXPLANATIONS_CSV_FILE)
         explanation_label = explanation_data.iloc[:, 1]
         self.data.insert(0, "explanation set", explanation_label)
-        print("data", self.data)
 
     def train_dataloader(self):
         HELOC_train = ExplanationDataset(self.training_split)
