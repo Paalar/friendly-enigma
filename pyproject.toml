@@ -15,7 +15,6 @@ prompt-toolkit = "^3.0.8"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
-shap = "^0.36.0"
 black = {version = "^20.8b1", allow-prereleases = true}
 
 [build-system]
