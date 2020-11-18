@@ -120,35 +120,30 @@ class MultiTaskLearner(GenericLearner):
             grad_outputs=torch.ones(explanation.shape[0]),
             create_graph=True,
         )
-        positive_xor, negative_xor = self.get_prefix_differences(layer_pred, layer_exp)
-        loss_convergence = sum(
-            [
-                abs(value) if positive_xor[index][value_index] else 0
-                for (index, batch_item) in enumerate(layer_exp)
-                for (value_index, value) in enumerate(batch_item)
-            ]
-        )
-        return loss_convergence
+        return self.get_explanation_prefix_difference(layer_pred, layer_exp)
 
     def converge_weights(self, explanation):
-        highest_index = torch.argmax(explanation[0]).item()
-        counting_weights = self.explanation_head.weight[highest_index]
-        positive_xor, negative_xor = self.get_prefix_differences(
+        highest_indices = torch.argmax(explanation, dim=1)
+        counting_weights = torch.stack(
+            [self.explanation_head.weight[index] for index in highest_indices]
+        )
+        return self.get_explanation_prefix_difference(
             self.prediction_head.weight, counting_weights
         )
-        loss_convergence = sum(
-            [
-                abs(x) if positive_xor[0][index] else 0
-                for (index, x) in enumerate(counting_weights)
-            ]
-        )
-        return loss_convergence
 
-    def get_prefix_differences(self, tensor1, tensor2):
+    def get_explanation_prefix_difference(self, tensor1, tensor2):
         tensor1_positive = tensor1 > 0
         tensor1_negative = tensor1 < 0
         tensor2_positive = tensor2 > 0
         tensor2_negative = tensor2 < 0
         positive_xor = torch.logical_xor(tensor1_positive, tensor2_positive)
         negative_xor = torch.logical_xor(tensor1_negative, tensor2_negative)
-        return positive_xor, negative_xor
+
+        explanation_prefix_convergence_distance = sum(
+            [
+                abs(value) if positive_xor[index][value_index] else 0
+                for (index, batch_item) in enumerate(tensor2)
+                for (value_index, value) in enumerate(batch_item)
+            ]
+        )
+        return explanation_prefix_convergence_distance
