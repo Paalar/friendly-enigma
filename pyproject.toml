@@ -12,6 +12,7 @@ pytorch-lightning = "^1.0.4"
 comet-ml = "^3.2.5"
 edc = {git = "https://github.com/FluidSense/edc.git"}
 prompt-toolkit = "^3.0.8"
+PyYAML = "^5.3.1"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
