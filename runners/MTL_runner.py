@@ -3,6 +3,7 @@ from data.explanationDataModule import ExplanationDataModule
 from runners.STL_runner import STLRunner
 from config import config
 
+
 class MTLRunner(STLRunner):
     def __init__(self, **kwargs):
         super().__init__(
