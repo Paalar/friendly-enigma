@@ -1,13 +1,14 @@
 import pandas as pd
 import inspect
+
 from pytorch_lightning import LightningDataModule
 from .helocDataset import HELOCDataset
 from torch.utils.data import DataLoader
-
+from config import config
 
 class HelocDataModule(LightningDataModule):
 
-    def __init__(self, validation_size: int = 2, workers: int = 8, batch_size: int = 64):
+    def __init__(self, validation_size: int = 2, workers: int = 8, batch_size: int = config["batch_size"]):
         super().__init__()
         self.validation_size = validation_size
         self.workers = workers

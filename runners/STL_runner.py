@@ -6,6 +6,7 @@ from datetime import datetime
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 # Project imports
+from config import config
 from models.core_model import Net
 from models.singleTaskLearner import SingleTaskLearner
 from data.helocDataModule import HelocDataModule
@@ -15,8 +16,8 @@ import dashboard
 class STLRunner:
     def __init__(
         self,
-        nodes_before_split=64,
-        max_epochs=13,
+        nodes_before_split=config["nodes_before_split"],
+        max_epochs=config["mtl_epochs"],
         data_module=HelocDataModule(),
         checkpoints_prefix="stl",
     ):

@@ -1,6 +1,7 @@
 import torch.nn.functional as F
 import torch
 
+from config import config
 from torch import nn, optim, autograd
 from typing import Tuple
 from models.core_model import Net
@@ -14,7 +15,7 @@ class MultiTaskLearner(GenericLearner):
         super(MultiTaskLearner, self).__init__(heads=2, model_core=model_core)
         self.save_hyperparameters()
         # Hyperparameters
-        self.learning_rate = 0.01
+        self.learning_rate = config["mtl_learning_rate"]
         # https://towardsdatascience.com/multi-task-learning-with-pytorch-and-fastai-6d10dc7ce855
         self.log_vars = nn.Parameter(torch.zeros((2)))
         # Heads

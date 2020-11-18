@@ -2,6 +2,7 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 import torch
 
+from config import config
 from torch import nn, optim
 from models.core_model import Net
 from models.genericLearner import GenericLearner
@@ -14,7 +15,7 @@ class SingleTaskLearner(GenericLearner):
         )  # Not sure what this does
         self.save_hyperparameters()
         # Hyperparameters
-        self.learning_rate = 0.01
+        self.learning_rate = config["stl_learning_rate"]
         # https://towardsdatascience.com/multi-task-learning-with-pytorch-and-fastai-6d10dc7ce855
         self.log_vars = nn.Parameter(torch.zeros((1)))
         # Heads

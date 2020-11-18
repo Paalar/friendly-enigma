@@ -2,23 +2,32 @@ from torch import nn
 import torch
 import torch.nn.functional as F
 
+from torch import nn
+from config import config
+
 class Net(nn.Module):
 
     def __init__(self, input_length, output_length):
         super(Net, self).__init__()
-        self.input_layer = nn.Linear(input_length, 64)
-        self.hidden_1 = nn.Linear(64, 128)
-        self.dropout = nn.Dropout(0.2)
-        self.hidden_2 = nn.Linear(128, output_length)
+        config_layers = config["hidden_layers"]
+        config_layers.append(output_length)
+        activations = [get_activation(name) for name in config["activations"]]
+
+        first_layer = nn.Linear(input_length, config_layers[0])
+        linear_layers = [nn.Linear(config_layers[index], config_layers[index + 1]) for index in range(len(config_layers)-1)]
+        linear_layers.insert(0, first_layer)
+        self.layers = [layer for pair in zip(linear_layers, activations) for layer in pair]
 
     def forward(self, data_input):
-        input_layer = self.input_layer(data_input)
-        activation_input = F.relu(input_layer)
+        output = data_input
+        for layer in self.layers:
+            output = layer(output)
+        return output
 
-        hidden_1 = self.hidden_1(activation_input)
-        activation_1 = F.relu(hidden_1)
-        dropped = self.dropout(activation_1)
-
-        last_hidden = self.hidden_2(dropped)
-        activation_last = F.relu(last_hidden)
-        return activation_last
+def get_activation(name):
+    if name == "relu":
+        return nn.ReLU()
+    elif name == "sigmoid":
+        return nn.Sigmoid()
+    else:
+        return nn.ReLU()
