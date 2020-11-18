@@ -12,3 +12,5 @@ hidden_layers: [64, 128]
 # The activations list needs to be the length of hidden_layers + 1
 # as the last layer is provided by nodes_before_split
 activations: ["relu", "relu", "relu"]
+# weights or gradients
+loss_converge_method: weights

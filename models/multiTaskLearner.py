@@ -48,66 +48,17 @@ class MultiTaskLearner(GenericLearner):
             explanation,
             explanation_label,
         ) = self.predict_batch(batch)
-        """
-        (layer_pred,) = autograd.grad(
-            torch.sum(prediction, dim=1),
-            self.act,
-            grad_outputs=torch.ones(prediction.shape[0]),
-            create_graph=True,
-        )
-        (layer_exp,) = autograd.grad(
-            torch.sum(explanation, dim=1),
-            self.act,
-            grad_outputs=torch.ones(explanation.shape[0]),
-            create_graph=True,
-        )
-        above_zeros_pred = torch.tensor((layer_pred > 0).float(), requires_grad=True)
-        below_zeros_pred = torch.tensor((layer_pred < 0).float(), requires_grad=True)
-        above_zeros_exp = torch.tensor((layer_exp > 0).float(), requires_grad=True)
-        below_zeros_exp = torch.tensor((layer_exp < 0).float(), requires_grad=True)
-        T_above = F.mse_loss(above_zeros_pred, above_zeros_exp)
-        T_below = F.mse_loss(below_zeros_pred, below_zeros_exp)
-        T = T_above + T_below
-        """
-        # print("Prediction", prediction[0])
-        # print("Explanation weights", self.explanation_head.weight)
-        # print("Explanation", explanation[0])
-        torch.set_printoptions(profile="full")
-        highest_index = torch.argmax(explanation[0]).item()
-        counting_weights = self.explanation_head.weight[highest_index]
-        # print("Important weights", counting_weights)
-        positive_prediction_weights = self.prediction_head.weight > 0
-        negative_prediction_weights = self.prediction_head.weight < 0
-        positive_explanation_weights = counting_weights > 0
-        negative_explanation_weights = counting_weights < 0
-        # print("Important weights positive", positive_explanation_weights)
-        # print("Important weights negative", negative_explanation_weights)
-        # print("Prediction weights", self.prediction_head.weight)
-        # print("Prediction weights positive", positive_prediction_weights)
-        # print("Prediction weights negative", negative_prediction_weights)
-        positive_xor = torch.logical_xor(
-            positive_prediction_weights, positive_explanation_weights
-        )
-        negative_xor = torch.logical_xor(
-            negative_prediction_weights, negative_explanation_weights
-        )
-        # print("Positive XOR", positive_xor)
-        # print("Negative XOR", negative_xor)
-        loss_convergence = sum(
-            [
-                abs(x) if positive_xor[0][index] else 0
-                for (index, x) in enumerate(counting_weights)
-            ]
-        )
-        #  print("Loss convergence", loss_convergence)
 
-        torch.set_printoptions(profile="default")
+        loss_convergence = (
+            self.converge_gradients(prediction, explanation)
+            if config["loss_converge_method"] == "gradients"
+            else self.converge_weights(explanation)
+        )
         loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
         loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
         self.log("Loss/train-prediction", loss_prediction)
         self.log("Loss/train-explanation", loss_explanation)
         self.log("Loss/train-head-difference", loss_convergence)
-        # self.log("Loss/train-head-difference-below", T_below)
         self.metrics_update("train-step", prediction, prediction_label)
         self.metrics_update("train-step", prediction, prediction_label, head=1)
         pred_weight = (
@@ -155,3 +106,49 @@ class MultiTaskLearner(GenericLearner):
         loss = loss_function(prediction, correct_label)
         precision = 1  # torch.exp(-self.log_vars[head_number])
         return precision * loss  # + self.log_vars[head_number] + T
+
+    def converge_gradients(self, prediction, explanation):
+        (layer_pred,) = autograd.grad(
+            torch.sum(prediction, dim=1),
+            self.act,
+            grad_outputs=torch.ones(prediction.shape[0]),
+            create_graph=True,
+        )
+        (layer_exp,) = autograd.grad(
+            torch.sum(explanation, dim=1),
+            self.act,
+            grad_outputs=torch.ones(explanation.shape[0]),
+            create_graph=True,
+        )
+        positive_xor, negative_xor = self.get_prefix_differences(layer_pred, layer_exp)
+        loss_convergence = sum(
+            [
+                abs(value) if positive_xor[index][value_index] else 0
+                for (index, batch_item) in enumerate(layer_exp)
+                for (value_index, value) in enumerate(batch_item)
+            ]
+        )
+        return loss_convergence
+
+    def converge_weights(self, explanation):
+        highest_index = torch.argmax(explanation[0]).item()
+        counting_weights = self.explanation_head.weight[highest_index]
+        positive_xor, negative_xor = self.get_prefix_differences(
+            self.prediction_head.weight, counting_weights
+        )
+        loss_convergence = sum(
+            [
+                abs(x) if positive_xor[0][index] else 0
+                for (index, x) in enumerate(counting_weights)
+            ]
+        )
+        return loss_convergence
+
+    def get_prefix_differences(self, tensor1, tensor2):
+        tensor1_positive = tensor1 > 0
+        tensor1_negative = tensor1 < 0
+        tensor2_positive = tensor2 > 0
+        tensor2_negative = tensor2 < 0
+        positive_xor = torch.logical_xor(tensor1_positive, tensor2_positive)
+        negative_xor = torch.logical_xor(tensor1_negative, tensor2_negative)
+        return positive_xor, negative_xor
