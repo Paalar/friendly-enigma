@@ -2,23 +2,27 @@
 import pytorch_lightning as pl
 
 # Subpackage
+from functools import partialmethod
 from datetime import datetime
 from pytorch_lightning.callbacks import ModelCheckpoint
+from ray.tune.integration.pytorch_lightning import TuneReportCallback
 
 # Project imports
+from config import config
 from models.core_model import Net
 from models.singleTaskLearner import SingleTaskLearner
 from data.helocDataModule import HelocDataModule
-import dashboard
+from utils import dashboard
 
 
 class STLRunner:
     def __init__(
         self,
-        nodes_before_split=64,
-        max_epochs=13,
+        nodes_before_split=config["nodes_before_split"],
+        max_epochs=config["mtl_epochs"],
         data_module=HelocDataModule(),
         checkpoints_prefix="stl",
+        tune_config=None,
     ):
         self.max_epochs = max_epochs
         self.nodes_before_split = nodes_before_split
@@ -28,7 +32,9 @@ class STLRunner:
         self.checkpoints_prefix = checkpoints_prefix
         input_length = self.data_module.row_length
         self.model_core = Net(
-            input_length=input_length, output_length=nodes_before_split
+            input_length=input_length,
+            output_length=nodes_before_split,
+            tune_config=tune_config,
         )
         self.model = SingleTaskLearner(
             model_core=self.model_core,

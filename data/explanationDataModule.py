@@ -1,5 +1,6 @@
 import pandas as pd
 
+from config import config
 from data.helocDataModule import HelocDataModule
 from data.explanationDataset import ExplanationDataset
 from torch.utils.data import DataLoader
