@@ -10,7 +10,10 @@ from functools import partial
 parser = ArgumentParser(description="A multitask learner")
 parser.add_argument("model_type", choices=["mtl", "stl"], help="")
 
-tune_config = {"hidden_layers": tune.choice([[1, 2], [32, 64]])}
+tune_config = {
+    "hidden_layers": tune.choice([[1, 2], [32, 64]]),
+    "activations": tune.choice([["relu", "relu", "relu"], ["sigmoid", "sigmoid", "sigmoid"]])
+    }
 callback = TuneReportCallback({"loss": "loss_validate"}, on="validation_end")
 
 
