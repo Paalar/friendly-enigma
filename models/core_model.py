@@ -9,14 +9,10 @@ from config import config
 class Net(nn.Module):
     def __init__(self, input_length, output_length, tune_config):
         super(Net, self).__init__()
-        config_layers = (
-            tune_config["hidden_layers"]
-            if not tune_config == None
-            else config["hidden_layers"]
-        )
-        config_layers = config_layers.sample()
+        self.tune_config = tune_config
+        config_layers = self.get_config("hidden_layers")
         config_layers.append(output_length)
-        activations = [get_activation(name) for name in config["activations"]]
+        activations = [get_activation(name) for name in self.get_config("activations")]
 
         first_layer = nn.Linear(input_length, config_layers[0])
         linear_layers = [
@@ -34,6 +30,13 @@ class Net(nn.Module):
             output = layer(output)
         return output
 
+
+    def get_config(self, name):
+        return (
+            self.tune_config[name].sample()
+            if not self.tune_config == None
+            else config[name]
+        )
 
 def get_activation(name):
     if name == "relu":

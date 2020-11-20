@@ -14,6 +14,7 @@ from models.singleTaskLearner import SingleTaskLearner
 from data.helocDataModule import HelocDataModule
 from utils import dashboard
 
+
 class STLRunner:
     def __init__(
         self,
@@ -40,6 +41,16 @@ class STLRunner:
             input_length=nodes_before_split,
             output_length=1,
         )
+
+    def run(self):
+        trainer = pl.Trainer(
+            max_epochs=self.max_epochs,
+            logger=self.logger,
+            checkpoint_callback=create_checkpoint_callback(self.checkpoints_prefix),
+        )
+        trainer.fit(self.model, self.data_module)
+        trainer.test(self.model, datamodule=self.data_module)
+
 
 def create_checkpoint_callback(prefix):
     return ModelCheckpoint(
