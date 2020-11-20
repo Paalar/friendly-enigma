@@ -6,7 +6,7 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --mem=12000
 #SBATCH --job-name="STL XAI"
-#SBATCH --output=stl.out
+#SBATCH --output=slurm-stl.out
 #SBATCH --mail-user=paaledwl@stud.ntnu.no
 #SBATCH --mail-type=ALL
  
@@ -26,7 +26,8 @@ module purge
 module load intel/2020a
 module load Python/3.8.2
 
-cd friendly-enigma
+cd ..
+export source ./.env
 git pull
 
 type virtualenv

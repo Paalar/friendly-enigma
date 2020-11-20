@@ -6,7 +6,7 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --mem=12000
 #SBATCH --job-name="Tune parameters"
-#SBATCH --output=tune.out
+#SBATCH --output=slurm-tune.out
 #SBATCH --mail-user=paaledwl@stud.ntnu.no
 #SBATCH --mail-type=ALL
  
@@ -25,7 +25,7 @@ module purge
 module load intel/2020a
 module load Python/3.8.2
 
-cd friendly-enigma
+cd ..
 git pull
 
 type virtualenv

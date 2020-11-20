@@ -6,7 +6,7 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --mem=12000
 #SBATCH --job-name="Prune data"
-#SBATCH --output=prune.out
+#SBATCH --output=slurm-prune.out
 #SBATCH --mail-user=paaledwl@stud.ntnu.no
 #SBATCH --mail-type=ALL
  
@@ -25,11 +25,13 @@ module purge
 module load intel/2020a
 module load Python/3.8.2
 
-cd friendly-enigma
+cd ..
 
 type virtualenv
 virtualenv env
 source env/bin/activate
 
 pip install -r requirements.txt
-python data/prune_dataset.py
+
+cd data
+python prune_dataset.py
