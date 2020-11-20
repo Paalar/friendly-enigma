@@ -2,16 +2,17 @@
 import pytorch_lightning as pl
 
 # Subpackage
+from functools import partialmethod
 from datetime import datetime
 from pytorch_lightning.callbacks import ModelCheckpoint
+from ray.tune.integration.pytorch_lightning import TuneReportCallback
 
 # Project imports
 from config import config
 from models.core_model import Net
 from models.singleTaskLearner import SingleTaskLearner
 from data.helocDataModule import HelocDataModule
-import dashboard
-
+from utils import dashboard
 
 class STLRunner:
     def __init__(
@@ -20,6 +21,7 @@ class STLRunner:
         max_epochs=config["mtl_epochs"],
         data_module=HelocDataModule(),
         checkpoints_prefix="stl",
+        tune_config=None,
     ):
         self.max_epochs = max_epochs
         self.nodes_before_split = nodes_before_split
@@ -29,23 +31,15 @@ class STLRunner:
         self.checkpoints_prefix = checkpoints_prefix
         input_length = self.data_module.row_length
         self.model_core = Net(
-            input_length=input_length, output_length=nodes_before_split
+            input_length=input_length,
+            output_length=nodes_before_split,
+            tune_config=tune_config,
         )
         self.model = SingleTaskLearner(
             model_core=self.model_core,
             input_length=nodes_before_split,
             output_length=1,
         )
-
-    def run(self):
-        trainer = pl.Trainer(
-            max_epochs=self.max_epochs,
-            logger=self.logger,
-            checkpoint_callback=create_checkpoint_callback(self.checkpoints_prefix),
-        )
-        trainer.fit(self.model, self.data_module)
-        trainer.test(self.model, datamodule=self.data_module)
-
 
 def create_checkpoint_callback(prefix):
     return ModelCheckpoint(

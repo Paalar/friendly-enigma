@@ -10,7 +10,7 @@ class MTLRunner(STLRunner):
             **kwargs,
             data_module=ExplanationDataModule(),
             max_epochs=config["mtl_epochs"],
-            checkpoints_prefix="mtl"
+            checkpoints_prefix="mtl",
         )
         self.model = MultiTaskLearner(
             model_core=self.model_core,

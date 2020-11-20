@@ -7,9 +7,14 @@ from config import config
 
 
 class Net(nn.Module):
-    def __init__(self, input_length, output_length):
+    def __init__(self, input_length, output_length, tune_config):
         super(Net, self).__init__()
-        config_layers = config["hidden_layers"]
+        config_layers = (
+            tune_config["hidden_layers"]
+            if not tune_config == None
+            else config["hidden_layers"]
+        )
+        config_layers = config_layers.sample()
         config_layers.append(output_length)
         activations = [get_activation(name) for name in config["activations"]]
 
