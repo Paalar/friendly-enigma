@@ -139,11 +139,13 @@ class MultiTaskLearner(GenericLearner):
         positive_xor = torch.logical_xor(tensor1_positive, tensor2_positive)
         negative_xor = torch.logical_xor(tensor1_negative, tensor2_negative)
 
-        explanation_prefix_convergence_distance = sum(
-            [
-                abs(value) if positive_xor[index][value_index] else 0
-                for (index, batch_item) in enumerate(tensor2)
-                for (value_index, value) in enumerate(batch_item)
-            ]
+        converge_distances = tensor2 * positive_xor.float()
+        explanation_prefix_convergence_distance = F.mse_loss(
+            converge_distances, torch.zeros(converge_distances.size())
         )
+        """
+        explanation_prefix_convergence_distance = sum(
+            sum(torch.abs(converge_distances))
+        )
+        """
         return explanation_prefix_convergence_distance
