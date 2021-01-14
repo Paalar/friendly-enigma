@@ -66,7 +66,7 @@ if query_model:
     data_module.setup("test")
     data_provider = iter(data_module.test_dataloader())
 
-    while query_model == "y" or query_model == "yes":
+    while "y" in query_model.lower():
         input_data, correct_data, correct_explanation = next(data_provider)
         torch.set_printoptions(profile="full")
         toggle_silent = False
@@ -106,9 +106,9 @@ if query_model:
             )
 
             if not toggle_silent:
-                cont = input("Continue? [Y: Yes / S: Silently complete batch] ")
-                if not (cont == "y" or cont == "yes" or cont == "Y"):
-                    if cont == "S" or cont == "s":
+                cont = input("Continue? [Y: Yes / S: Silently complete batch] ").lower()
+                if not (cont == "y" or cont == "yes"):
+                    if cont == "s":
                         toggle_silent = True
                     else:
                         break
