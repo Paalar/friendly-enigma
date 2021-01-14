@@ -19,3 +19,7 @@ def print_git_diff(pred, expected):
             print(green_text(val) + " | " + green_text(expected_val))
         else:
             print(red_text(val) + " | " + green_text(expected_val))
+
+
+def create_cond_print(condition):
+    return lambda *args: condition and print(*args)
