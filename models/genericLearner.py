@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
 import pytorch_lightning as pl
+import torch
 
 from models.core_model import Net
 
@@ -15,6 +16,7 @@ class GenericLearner(pl.LightningModule, ABC):
             pl.metrics.Fbeta,
         ]
         self.metrics = [[metric() for metric in metrics] for head in range(heads)]
+        self.heads = heads
 
     @abstractmethod
     def forward(self, data_input):
@@ -41,12 +43,14 @@ class GenericLearner(pl.LightningModule, ABC):
         raise NotImplementedError
 
     def test_epoch_end(self, outs):
-        self.metrics_compute("test-epoch")
+        for head in range(self.heads):
+            self.metrics_compute("test-epoch", head=head)
 
     def training_epoch_end(self, outs):
-        self.metrics_compute("train-epoch")
+        for head in range(self.heads):
+            self.metrics_compute("train-epoch", head=head)
 
-    def metrics_compute(self, label, head=0):
+    def metrics_compute(self, label, head):
         metric = self.metrics[head]
         self.log(f"Accuracy/head-{head}/{label}", metric[0].compute())
         self.log(f"Precision/head-{head}/{label}", metric[1].compute())
@@ -55,7 +59,15 @@ class GenericLearner(pl.LightningModule, ABC):
 
     def metrics_update(self, label, prediction, correct_label, head=0):
         metric = self.metrics[head]
-        self.log(f"Accuracy/head-{head}/{label}", metric[0](prediction, correct_label))
+        if head == 1:
+            self.log(
+                f"Accuracy/head-{head}/{label}",
+                metric[0](prediction, torch.max(correct_label, 1)[1]),
+            )
+        else:
+            self.log(
+                f"Accuracy/head-{head}/{label}", metric[0](prediction, correct_label)
+            )
         self.log(f"Precision/head-{head}/{label}", metric[1](prediction, correct_label))
         self.log(f"Recall/head-{head}/{label}", metric[2](prediction, correct_label))
         self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, correct_label))

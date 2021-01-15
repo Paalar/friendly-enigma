@@ -54,13 +54,13 @@ class MultiTaskLearner(GenericLearner):
             if config["loss_converge_method"] == "gradients"
             else self.converge_weights(explanation)
         )
-        loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
-        loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
+        loss_prediction = self.calculate_loss(prediction, prediction_label)
+        loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
         self.log("Loss/train-prediction", loss_prediction)
         self.log("Loss/train-explanation", loss_explanation)
         self.log("Loss/train-head-difference", loss_convergence)
         self.metrics_update("train-step", prediction, prediction_label)
-        self.metrics_update("train-step", prediction, prediction_label, head=1)
+        self.metrics_update("train-step", explanation, explanation_label, head=1)
         pred_weight = (
             1  # 0.2 if self.current_epoch > 100 else 50 / (self.current_epoch + 1)
         )
@@ -79,8 +79,8 @@ class MultiTaskLearner(GenericLearner):
             explanation,
             explanation_label,
         ) = self.predict_batch(batch)
-        loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
-        loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
+        loss_prediction = self.calculate_loss(prediction, prediction_label)
+        loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
         self.log("loss_validate", loss_prediction)
         self.log("loss_validate", loss_prediction)
         return loss_prediction + loss_explanation
@@ -92,8 +92,8 @@ class MultiTaskLearner(GenericLearner):
             explanation,
             explanation_label,
         ) = self.predict_batch(batch)
-        loss_prediction = self.calculate_loss(prediction, prediction_label, 0)
-        loss_explanation = self.calculate_loss(explanation, explanation_label, 1)
+        loss_prediction = self.calculate_loss(prediction, prediction_label)
+        loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
         self.metrics_update("test-step", prediction, prediction_label)
         self.metrics_update("test-step", explanation, explanation_label, head=1)
         self.log("Loss/test", loss_prediction)
@@ -101,11 +101,11 @@ class MultiTaskLearner(GenericLearner):
     def configure_optimizers(self):
         return optim.Adagrad(self.parameters(), lr=self.learning_rate)
 
-    def calculate_loss(self, prediction, correct_label, head_number, T=0):
-        loss_function = self.loss_functions[head_number]
+    def calculate_loss(self, prediction, correct_label, head=0, T=0):
+        loss_function = self.loss_functions[head]
         loss = loss_function(prediction, correct_label)
-        precision = 1  # torch.exp(-self.log_vars[head_number])
-        return precision * loss  # + self.log_vars[head_number] + T
+        precision = 1  # torch.exp(-self.log_vars[head])
+        return precision * loss  # + self.log_vars[head] + T
 
     def converge_gradients(self, prediction, explanation):
         (layer_pred,) = autograd.grad(
