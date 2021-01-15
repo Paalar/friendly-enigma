@@ -5,7 +5,7 @@ import torch
 
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, metrics
 
 from models.singleTaskLearner import SingleTaskLearner
 from models.multiTaskLearner import MultiTaskLearner
@@ -61,6 +61,52 @@ trainer.test(model, datamodule=data_module)
 
 query_model = input("Query model? ")
 
+
+def get_model_outs(batch):
+    raw_predicted_data, raw_predicted_explanation = model(batch)
+    predicted_data = raw_predicted_data
+    correct_prediction_instance = correct_data[index]
+    predicted_explanation = raw_predicted_explanation
+    correct_explanation_instance = correct_explanation[index]
+    return (
+        predicted_data,
+        predicted_explanation,
+        correct_prediction_instance,
+        correct_explanation_instance,
+    )
+
+
+def inspect_prediction(cond_print):
+    cond_print("Predicting on:", batch)
+    cond_print("--Prediction--")
+    cond_print("Predicted:", predicted_data)
+    predicted_correctly = (
+        round(predicted_data.item()) == correct_prediction_instance.item()
+    )
+    print_color_pred = green_text if predicted_correctly else red_text
+    cond_print("Correct prediction:", print_color_pred(correct_prediction_instance))
+    return 1 if predicted_correctly else 0
+
+
+def inspect_explanation(cond_print):
+    cond_print("--Explanation--")
+    cond_print("Explained:", predicted_explanation)
+    explained_correctly = torch.argmax(predicted_explanation) == torch.argmax(
+        correct_explanation_instance
+    )
+
+    print_color_exp = green_text if explained_correctly else red_text
+    cond_print(
+        "Correct explanation:",
+        print_color_exp(correct_explanation_instance),
+    )
+    cond_print(f"Explained parameter {torch.argmax(predicted_explanation)} as highest.")
+    cond_print(
+        f"Correct has parameter {torch.argmax(correct_explanation_instance)} as highest."
+    )
+    return 1 if explained_correctly else 0
+
+
 if query_model:
     data_module.prepare_data()
     data_module.setup("test")
@@ -74,36 +120,14 @@ if query_model:
         stats_exp_correct = 0
         for index, batch in enumerate(input_data):
             cond_print = create_cond_print(not toggle_silent)
-            predicted_data, predicted_explanation = model(batch)
-            cond_print("Predicting on:", batch)
-            cond_print("--Prediction--")
-            cond_print("Predicted:", predicted_data)
-            predicted_correctly = (
-                round(predicted_data.item()) == correct_data[index].item()
-            )
-            if predicted_correctly:
-                stats_pred_correct += 1
-            print_color_pred = green_text if predicted_correctly else red_text
-            cond_print("Correct prediction:", print_color_pred(correct_data[index]))
-
-            cond_print("--Explanation--")
-            cond_print("Explained:", predicted_explanation)
-            explained_correctly = torch.argmax(predicted_explanation) == torch.argmax(
-                correct_explanation[index]
-            )
-
-            if explained_correctly:
-                stats_exp_correct += 1
-            print_color_exp = green_text if explained_correctly else red_text
-            cond_print(
-                "Correct explanation:", print_color_exp(correct_explanation[index])
-            )
-            cond_print(
-                f"Explained parameter {torch.argmax(predicted_explanation)} as highest."
-            )
-            cond_print(
-                f"Correct has parameter {torch.argmax(correct_explanation[index])} as highest."
-            )
+            (
+                predicted_data,
+                predicted_explanation,
+                correct_prediction_instance,
+                correct_explanation_instance,
+            ) = get_model_outs(batch)
+            stats_pred_correct += inspect_prediction(cond_print)
+            stats_exp_correct += inspect_explanation(cond_print)
 
             if not toggle_silent:
                 cont = input("Continue? [Y: Yes / S: Silently complete batch] ").lower()
