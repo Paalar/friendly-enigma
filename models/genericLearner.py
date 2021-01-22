@@ -13,10 +13,12 @@ class GenericLearner(pl.LightningModule, ABC):
             pl.metrics.Accuracy,
             pl.metrics.Precision,
             pl.metrics.Recall,
-            pl.metrics.Fbeta,
         ]
         self.metrics = [[metric() for metric in metrics] for head in range(heads)]
         self.heads = heads
+        self.metrics[0].append(pl.metrics.FBeta(num_classes=1))
+        if heads > 1:
+            self.metrics[1].append(pl.metrics.FBeta(num_classes=23))
 
     @abstractmethod
     def forward(self, data_input):
