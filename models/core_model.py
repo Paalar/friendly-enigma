@@ -20,9 +20,9 @@ class Net(nn.Module):
             for index in range(len(config_layers) - 1)
         ]
         linear_layers.insert(0, first_layer)
-        self.layers = [
-            layer for pair in zip(linear_layers, activations) for layer in pair
-        ]
+        self.layers = nn.Sequential(
+            *[layer for pair in zip(linear_layers, activations) for layer in pair]
+        )
 
     def forward(self, data_input):
         output = data_input
@@ -30,13 +30,13 @@ class Net(nn.Module):
             output = layer(output)
         return output
 
-
     def get_config(self, name):
         return (
             self.tune_config[name].sample()
             if not self.tune_config == None
             else config[name]
         )
+
 
 def get_activation(name):
     if name == "relu":
