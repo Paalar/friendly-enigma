@@ -19,7 +19,7 @@ class STLRunner:
     def __init__(
         self,
         nodes_before_split=config["nodes_before_split"],
-        max_epochs=config["mtl_epochs"],
+        max_epochs=config["stl_epochs"],
         data_module=HelocDataModule(),
         checkpoints_prefix="stl",
         tune_config=None,
@@ -50,6 +50,7 @@ class STLRunner:
         )
         trainer.fit(self.model, self.data_module)
         trainer.test(self.model, datamodule=self.data_module)
+        dashboard.create_confusion_matrix(self.model, self.logger, self.data_module)
 
 
 def create_checkpoint_callback(prefix):

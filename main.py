@@ -1,3 +1,5 @@
+# Comet has to be imported first, that's just how it is.
+import comet_ml
 import pytorch_lightning as pl
 
 from ray import tune
@@ -9,6 +11,7 @@ from functools import partial
 
 parser = ArgumentParser(description="A multitask learner")
 parser.add_argument("model_type", choices=["mtl", "stl"], help="")
+
 
 def main():
     args = parser.parse_args()
