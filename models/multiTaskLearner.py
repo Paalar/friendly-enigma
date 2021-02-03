@@ -34,7 +34,7 @@ class MultiTaskLearner(GenericLearner):
         prediction = self.prediction_head(rest_output)
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
-        explanation = torch.sigmoid(explanation)
+        explanation = F.softmax(explanation)
         return prediction, explanation
 
     def predict_batch(self, batch):
