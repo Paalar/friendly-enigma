@@ -25,10 +25,7 @@ class Net(nn.Module):
         )
 
     def forward(self, data_input):
-        output = data_input
-        for layer in self.layers:
-            output = layer(output)
-        return output
+        return self.layers(data_input)
 
     def get_config(self, name):
         return (
