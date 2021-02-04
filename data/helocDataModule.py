@@ -12,12 +12,12 @@ class HelocDataModule(LightningDataModule):
         self,
         validation_size: int = 2,
         workers: int = 8,
-        batch_size: int = config["batch_size"],
+        batch_size: int = 70,
     ):
         super().__init__()
         self.validation_size = validation_size
-        self.workers = workers
-        self.batch_size = batch_size
+        self.workers = config["cpu_workers"] if type(config["cpu_workers"]) is int else workers
+        self.batch_size = config["batch_size"] if type(config["batch_size"]) is int else batch_size
 
     def prepare_data(self):
         CSV_FILE = "data/heloc_dataset_v1.csv"

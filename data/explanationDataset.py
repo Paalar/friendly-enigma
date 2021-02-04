@@ -1,5 +1,6 @@
 import torch
 from data.helocDataset import HELOCDataset
+from utils.custom_torch import zeros
 
 
 class ExplanationDataset(HELOCDataset):
@@ -35,7 +36,7 @@ class ExplanationDataset(HELOCDataset):
         return data, explanation_data
 
     def create_explanation_as_ints(self, indices):
-        template = torch.zeros([1, 23])
+        template = zeros([1, 23])
         for index in indices:
             template[0][index] = 1
         return template[0]

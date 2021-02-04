@@ -6,7 +6,7 @@ from config import config
 from torch import nn, optim
 from models.core_model import Net
 from models.genericLearner import GenericLearner
-
+from utils.custom_torch import zeros
 
 class SingleTaskLearner(GenericLearner):
     def __init__(self, model_core: Net, input_length: int, output_length: int):
@@ -17,7 +17,7 @@ class SingleTaskLearner(GenericLearner):
         # Hyperparameters
         self.learning_rate = config["stl_learning_rate"]
         # https://towardsdatascience.com/multi-task-learning-with-pytorch-and-fastai-6d10dc7ce855
-        self.log_vars = nn.Parameter(torch.zeros((1)))
+        self.log_vars = nn.Parameter(zeros((1)))
         # Heads
         self.prediction = nn.Linear(input_length, output_length)
         # Loss function

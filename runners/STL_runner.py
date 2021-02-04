@@ -23,6 +23,7 @@ class STLRunner:
         data_module=HelocDataModule(),
         checkpoints_prefix="stl",
         tune_config=None,
+        args=None,
     ):
         self.max_epochs = max_epochs
         self.nodes_before_split = nodes_before_split
@@ -30,6 +31,7 @@ class STLRunner:
         self.data_module = data_module
         self.data_module.prepare_data()
         self.checkpoints_prefix = checkpoints_prefix
+        self.args = args
         input_length = self.data_module.row_length
         self.model_core = Net(
             input_length=input_length,
@@ -43,7 +45,8 @@ class STLRunner:
         )
 
     def run(self):
-        trainer = pl.Trainer(
+        trainer = pl.Trainer.from_argparse_args(
+            self.args,
             max_epochs=self.max_epochs,
             logger=self.logger,
             checkpoint_callback=create_checkpoint_callback(self.checkpoints_prefix),

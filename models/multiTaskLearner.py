@@ -6,6 +6,7 @@ from torch import nn, optim, autograd
 from typing import Tuple
 from models.core_model import Net
 from models.genericLearner import GenericLearner
+from utils.custom_torch import zeros, ones
 
 
 def categorical_cross_entropy(explanation, true_explanation):
@@ -21,7 +22,7 @@ class MultiTaskLearner(GenericLearner):
         # Hyperparameters
         self.learning_rate = config["mtl_learning_rate"]
         # https://towardsdatascience.com/multi-task-learning-with-pytorch-and-fastai-6d10dc7ce855
-        self.log_vars = nn.Parameter(torch.zeros((2)))
+        # self.log_vars = nn.Parameter(torch.zeros((2)))
         # Heads
         self.prediction_head = nn.Linear(input_length, output_length[0])
         self.explanation_head = nn.Linear(input_length, output_length[1])
@@ -115,13 +116,13 @@ class MultiTaskLearner(GenericLearner):
         (layer_pred,) = autograd.grad(
             torch.sum(prediction, dim=1),
             self.act,
-            grad_outputs=torch.ones(prediction.shape[0]),
+            grad_outputs=ones(prediction.shape[0]),
             create_graph=True,
         )
         (layer_exp,) = autograd.grad(
             torch.sum(explanation, dim=1),
             self.act,
-            grad_outputs=torch.ones(explanation.shape[0]),
+            grad_outputs=ones(explanation.shape[0]),
             create_graph=True,
         )
         return self.get_explanation_prefix_difference(layer_pred, layer_exp)
@@ -145,7 +146,7 @@ class MultiTaskLearner(GenericLearner):
 
         converge_distances = tensor2 * positive_xor.float()
         explanation_prefix_convergence_distance = F.mse_loss(
-            converge_distances, torch.zeros(converge_distances.size())
+            converge_distances, zeros(converge_distances.size())
         )
         """
         explanation_prefix_convergence_distance = sum(

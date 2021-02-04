@@ -1,6 +1,8 @@
 from abc import abstractmethod, ABC
 import pytorch_lightning as pl
 import torch
+from utils.custom_torch import get_device
+from config import config
 
 from models.core_model import Net
 
@@ -14,11 +16,11 @@ class GenericLearner(pl.LightningModule, ABC):
             pl.metrics.Precision,
             pl.metrics.Recall,
         ]
-        self.metrics = [[metric() for metric in metrics] for head in range(heads)]
+        self.metrics = [[metric().to(get_device()) for metric in metrics] for head in range(heads)]
         self.heads = heads
-        self.metrics[0].append(pl.metrics.FBeta(num_classes=1))
+        self.metrics[0].append(pl.metrics.FBeta(num_classes=1).to(get_device()))
         if heads > 1:
-            self.metrics[1].append(pl.metrics.FBeta(num_classes=23))
+            self.metrics[1].append(pl.metrics.FBeta(num_classes=23).to(get_device()))
 
     @abstractmethod
     def forward(self, data_input):
