@@ -1,5 +1,6 @@
 import pandas as pd
 
+from argparse import ArgumentParser
 from pandas import DataFrame
 
 CSV_FILE = "./heloc_dataset_v1.csv"
@@ -45,11 +46,28 @@ def prune_dataset(dataset: DataFrame) -> DataFrame:
         pruned_dataset.loc[index, columns] = row
     return pruned_dataset
 
+def remove_rows_from_dataset(dataset: DataFrame, rows_to_skip: int) -> DataFrame:
+    if rows_to_skip == 0:
+        return dataset
+    sliced_dataset = dataset.copy()
+    counter = 1
+    for index, value in enumerate(sliced_dataset.iterrows()):
+        counter = 1 if rows_to_skip + 1 == counter else counter
+        if rows_to_skip == counter:
+            sliced_dataset = sliced_dataset.drop(index)
+        counter += 1
+    return sliced_dataset
 
 def main():
+    parser = ArgumentParser(description="Pruning dataset")
+    parser.add_argument("--prune", choices=["keep", "prune"])
+    parser.add_argument("--skip", type=int, default="0")
+    parser.add_argument("--name", type=str, default="heloc_dataset_pruned")
+    args = parser.parse_args()
     heloc_dataset = read_csv()
-    pruned_dataset = prune_dataset(heloc_dataset)
-    save_csv("heloc_dataset_pruned.csv", pruned_dataset)
+    pruned_dataset = prune_dataset(heloc_dataset) if args.prune == "prune" else heloc_dataset
+    sliced_dataset = remove_rows_from_dataset(pruned_dataset, args.skip)
+    save_csv(f"{args.name}.csv", sliced_dataset)
 
 
 if __name__ == "__main__":
