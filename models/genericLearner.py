@@ -8,7 +8,7 @@ from models.core_model import Net
 
 
 class GenericLearner(pl.LightningModule, ABC):
-    def __init__(self, model_core: Net, num_classes = [2]):
+    def __init__(self, model_core: Net, num_classes = [1]):
         super(GenericLearner, self).__init__()
         self.rest_of_model = model_core
         metrics = [
