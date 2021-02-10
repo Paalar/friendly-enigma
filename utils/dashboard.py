@@ -1,7 +1,17 @@
 import os
 
 from datetime import datetime
+
+try:
+    from comet_ml import ConfusionMatrix
+
+    importedConfusionMatrix = True
+except:
+    importedConfusionMatrix = False
+    pass
+
 from pytorch_lightning.loggers import CometLogger, TensorBoardLogger
+from pytorch_lightning.metrics import ConfusionMatrix
 
 
 def create_logger():
@@ -19,3 +29,23 @@ def create_logger():
     else:
         print("No Comet-API-key found, defaulting to Tensorboard", flush=True)
     return logger
+
+def create_confusion_matrix(model, logger, data_module):
+    if not importedConfusionMatrix or not isinstance(logger, CometLogger):
+        return
+    # confusion_matrix = ConfusionMatrix()
+    data_module.prepare_data()
+    data_module.setup("test")
+    model.eval()
+    if model.heads > 2:
+        title = "Test Confusion Matrix Explanations"
+        file_name = "explination-confusion-matrix.json"
+    else:
+        title = "Test Confusion Matrix Predictions"
+        file_name = "prediction-confusion-matrix.json"
+    logger.experiment.log_confusion_matrix(
+        matrix=model.metrics[model.heads - 1][4],
+        title=title,
+        file_name=file_name
+    )
+    model.train()

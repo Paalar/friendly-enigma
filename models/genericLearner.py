@@ -17,10 +17,10 @@ class GenericLearner(pl.LightningModule, ABC):
             pl.metrics.Recall,
         ]
         self.metrics = [[metric().to(get_device()) for metric in metrics] for head in range(len(num_classes))]
-        self.heds = len(num_classes)
+        self.heads = len(num_classes)
         for index, head in enumerate(num_classes):
             self.metrics[index].append(pl.metrics.FBeta(num_classes=head).to(get_device()))
-            self.metrics[index].append(pl.metrics.ConfusionMatrix(num_classes=2 if head == 1 else head).to(get_device()))
+            self.metrics[index].append(pl.metrics.ConfusionMatrix(num_classes=2 if head == 1 else head))
 
     @abstractmethod
     def forward(self, data_input):
@@ -60,7 +60,6 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Precision/head-{head}/{label}", metric[1].compute())
         self.log(f"Recall/head-{head}/{label}", metric[2].compute())
         self.log(f"Fbeta/head-{head}/{label}", metric[3].compute())
-        self.log(f"Confusion-matrix/head-{head}/{label}", metric[4].compute())
 
     def metrics_update(self, label, prediction, correct_label, head=0):
         print("prediction", prediction)
@@ -78,4 +77,4 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Precision/head-{head}/{label}", metric[1](prediction, correct_label))
         self.log(f"Recall/head-{head}/{label}", metric[2](prediction, correct_label))
         self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, correct_label))
-        self.log(f"Confusion-matrix/head-{head}/{label}", metric[4](prediction, torch.max(correct_label, 1)[1]))
+        metric[4].update(prediction, correct_label)

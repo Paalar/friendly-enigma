@@ -53,7 +53,7 @@ class STLRunner:
         )
         trainer.fit(self.model, self.data_module)
         trainer.test(self.model, datamodule=self.data_module)
-        # dashboard.create_confusion_matrix(self.model, self.logger, self.data_module)
+        dashboard.create_confusion_matrix(self.model, self.logger, self.data_module)
 
 
 def create_checkpoint_callback(prefix):
