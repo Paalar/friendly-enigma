@@ -62,8 +62,6 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Fbeta/head-{head}/{label}", metric[3].compute())
 
     def metrics_update(self, label, prediction, correct_label, head=0):
-        print("prediction", prediction)
-        print("correct", correct_label)
         metric = self.metrics[head]
         if head == 1:
             self.log(
