@@ -63,6 +63,8 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Confusion-matrix/head-{head}/{label}", metric[4].compute())
 
     def metrics_update(self, label, prediction, correct_label, head=0):
+        print("prediction", prediction)
+        print("correct", correct_label)
         metric = self.metrics[head]
         if head == 1:
             self.log(
