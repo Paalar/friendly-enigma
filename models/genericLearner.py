@@ -20,7 +20,7 @@ class GenericLearner(pl.LightningModule, ABC):
         self.heds = len(num_classes)
         for index, head in enumerate(num_classes):
             self.metrics[index].append(pl.metrics.FBeta(num_classes=head).to(get_device()))
-            self.metrics[index].append(pl.metrics.ConfusionMatrix(num_classes=head+1).to(get_device()))
+            self.metrics[index].append(pl.metrics.ConfusionMatrix(num_classes=2 if head == 1 else head).to(get_device()))
 
     @abstractmethod
     def forward(self, data_input):
