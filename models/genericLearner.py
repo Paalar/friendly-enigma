@@ -78,4 +78,4 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Precision/head-{head}/{label}", metric[1](prediction, correct_label))
         self.log(f"Recall/head-{head}/{label}", metric[2](prediction, correct_label))
         self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, correct_label))
-        self.log(f"Confusion-matrix/head-{head}/{label}", metric[4](prediction, correct_label))
+        self.log(f"Confusion-matrix/head-{head}/{label}", metric[4](prediction, torch.max(correct_label, 1)[1]))
