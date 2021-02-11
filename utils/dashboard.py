@@ -39,7 +39,7 @@ def create_confusion_matrix(model, logger, data_module):
     model.eval()
     for head in range(model.heads):
         title = "Test Confusion Matrix Predictions" if head == 0 else "Test Confusion Matrix Explanations"
-        file_name = "prediction-confusion-matrix.json" if head == 0 else "explination-confusion-matrix.json"
+        file_name = "prediction-confusion-matrix.json" if head == 0 else "explanation-confusion-matrix.json"
         logger.experiment.log_confusion_matrix(
             matrix=model.metrics[head][4].compute(),
             title=title,
