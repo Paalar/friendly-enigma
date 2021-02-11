@@ -104,7 +104,7 @@ class MultiTaskLearner(GenericLearner):
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
-        return optim.Adagrad(self.parameters(), lr=self.learning_rate)
+        return optim.Adadelta(self.parameters(), lr=self.learning_rate)
 
     def calculate_loss(self, prediction, correct_label, head=0, T=0):
         loss_function = self.loss_functions[head]
