@@ -24,18 +24,19 @@ def count_explanation_balance(explanations_dataset: DataFrame):
 
 
 def print_balance(balance):
+    balance = dict(sorted(balance.items(), key=lambda item: item[1], reverse=True))
     for explanation in balance:
         try:
             occurrence = balance[explanation]
             dataset_column_index = dataset_columns.get_loc(explanation)
-            print(f"[{dataset_column_index}]{explanation} = {occurrence} ({round(occurrence/dataset_length*100, 1)}%)")
+            print(f"[{dataset_column_index - 1}]{explanation} = {occurrence} ({round(occurrence/dataset_length*100, 1)}%)")
         except:
             explanations = explanation.split(",")
             multiple_label_explanations = ""
             for expl in explanations:
-                multiple_label_explanations += f"[{dataset_columns.get_loc(expl)}]{expl}"
+                multiple_label_explanations += f"[{dataset_columns.get_loc(expl) - 1}]{expl}"
             print(f"{multiple_label_explanations} = {occurrence} ({round(occurrence/dataset_length*100, 1)}%)")
-            # print(f"Error due to not supporting multiple labels.\nExplanation was: {explanations}")
+
 
 def main():
     explanation_balance = count_explanation_balance(explanations)
