@@ -17,7 +17,7 @@ class MultiTaskLearner(GenericLearner):
     def __init__(
         self, model_core: Net, input_length: int, output_length: Tuple[int, int]
     ):
-        super(MultiTaskLearner, self).__init__(heads=2, model_core=model_core)
+        super(MultiTaskLearner, self).__init__(num_classes=[1, 23], model_core=model_core)
         self.save_hyperparameters()
         # Hyperparameters
         self.learning_rate = config["mtl_learning_rate"]
@@ -86,7 +86,6 @@ class MultiTaskLearner(GenericLearner):
         ) = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
-        self.log("loss_validate", loss_prediction)
         self.log("loss_validate", loss_prediction)
         return loss_prediction + loss_explanation
 

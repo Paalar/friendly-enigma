@@ -1,8 +1,8 @@
 cpu_workers: 8
 
 batch_size: 69
-stl_epochs: 13
-mtl_epochs: 3000
+stl_epochs: 2
+mtl_epochs: 2
 
 nodes_before_split: 420
 stl_learning_rate: 0.01
