@@ -6,10 +6,13 @@ import numpy as np
 
 from pytorch_lightning import Trainer
 from edc.sedc_agnostic.sedc_algorithm import SEDC_Explainer
+from tqdm import tqdm
 
 from models.singleTaskLearner import SingleTaskLearner
 from data.helocDataModule import HelocDataModule
 from models.multiTaskLearner import Net
+from config import config
+from math import ceil
 
 # Load the model
 parser = argparse.ArgumentParser(
@@ -53,15 +56,25 @@ sedc_explainer = SEDC_Explainer(
     threshold_classifier=np.percentile(predictions, 75),
     classifier_fn=classifier_fn,
     silent=True,
+    max_explained=23,
+    BB=False
 )
 
+
+# TQDM-preparations
+dataset_length = sum([len(loader.dataset) for loader in loaders])
+batch_size = config["batch_size"]
+progressbar_length = ceil(dataset_length / batch_size)
+
 explanations = []
-for loader in loaders:
-    for batch in iter(loader):
-        values, _ = batch
-        for value in values:
-            explanation = sedc_explainer.explanation(value)
-            explanations.append(explanation)
+with tqdm(total=progressbar_length) as progressbar:
+    for loader in loaders:
+        for batch in iter(loader):
+            progressbar.update(1)
+            values, _ = batch
+            for value in values:
+                explanation = sedc_explainer.explanation(value)
+                explanations.append(explanation)
 
 
 df = pandas.DataFrame(explanations)
