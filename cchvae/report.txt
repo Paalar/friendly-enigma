@@ -1,0 +1,117 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 11 files
+Detected 0 issues that require attention
+--------------------------------------------------------------------------------
+================================================================================
+Detailed log follows:
+
+================================================================================
+================================================================================
+Input tree: '.'
+================================================================================
+--------------------------------------------------------------------------------
+Processing file './main.py'
+ outputting to './main.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/Evaluation.py'
+ outputting to './code/Evaluation.py'
+--------------------------------------------------------------------------------
+
+21:49: INFO: tf.random_normal_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+21:49: INFO: Renamed 'tf.random_normal_initializer' to 'tf.compat.v1.random_normal_initializer'
+59:12: INFO: Changing labels arg of tf.nn.softmax_cross_entropy_with_logits to tf.stop_gradient(labels). Please check this transformation.
+
+59:86: INFO: Renamed 'tf.log' to 'tf.math.log'
+64:32: INFO: Added keywords to args of function 'tf.reduce_sum'
+69:26: INFO: Added keywords to args of function 'tf.reduce_sum'
+73:11: INFO: Added keywords to args of function 'tf.reduce_mean'
+88:43: INFO: Added keywords to args of function 'tf.reduce_mean'
+90:32: INFO: Added keywords to args of function 'tf.boolean_mask'
+91:32: INFO: Added keywords to args of function 'tf.boolean_mask'
+92:35: INFO: Added keywords to args of function 'tf.boolean_mask'
+93:35: INFO: Added keywords to args of function 'tf.boolean_mask'
+95:16: INFO: Added keywords to args of function 'tf.reduce_mean'
+95:31: INFO: Added keywords to args of function 'tf.reduce_sum'
+96:9: INFO: Added keywords to args of function 'tf.reduce_mean'
+96:24: INFO: Added keywords to args of function 'tf.reduce_sum'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/Graph.py'
+ outputting to './code/Graph.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/Sampling.py'
+ outputting to './code/Sampling.py'
+--------------------------------------------------------------------------------
+
+2:0: INFO: Not upgrading symbols because `tensorflow.compat.v1` was directly imported as `tf`.
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/Generator.py'
+ outputting to './code/Generator.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/Encoder.py'
+ outputting to './code/Encoder.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/LaugelEtAl.py'
+ outputting to './code/LaugelEtAl.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/Decoder.py'
+ outputting to './code/Decoder.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/Loglik.py'
+ outputting to './code/Loglik.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/Helpers.py'
+ outputting to './code/Helpers.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file './code/__init__.py'
+ outputting to './code/__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
