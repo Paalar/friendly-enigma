@@ -19,6 +19,12 @@ parser = argparse.ArgumentParser(
     description="Generate counterfactuals as .csv for a given model"
 )
 parser.add_argument("checkpoint", type=str, help="File path to load")
+parser.add_argument(
+    "--merge",
+    type=bool,
+    default=False,
+    help="Create a new merged dataset with explanation column",
+)
 args = parser.parse_args()
 model = SingleTaskLearner.load_from_checkpoint(args.checkpoint)
 
@@ -56,8 +62,7 @@ sedc_explainer = SEDC_Explainer(
     threshold_classifier=np.percentile(predictions, 75),
     classifier_fn=classifier_fn,
     silent=True,
-    max_explained=23,
-    BB=False
+    max_explained=1,
 )
 
 
@@ -78,4 +83,10 @@ with tqdm(total=progressbar_length) as progressbar:
 
 
 df = pandas.DataFrame(explanations)
-df.to_csv("data/explanations.csv")
+if not args.merge:
+    df.to_csv("data/explanations.csv")
+else:
+    explanation_label = df.iloc[:, 0].transform(lambda x: list(np.array(x).flatten()))
+    heloc = pandas.read_csv("data/heloc_dataset_v1.csv")
+    heloc.insert(1, "explanation_label", explanation_label)
+    heloc.to_csv("data/heloc_with_explanations.csv", index=False)

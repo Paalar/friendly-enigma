@@ -8,6 +8,7 @@ from models.core_model import Net
 from models.genericLearner import GenericLearner
 from utils.custom_torch import zeros
 
+
 class SingleTaskLearner(GenericLearner):
     def __init__(self, model_core: Net, input_length: int, output_length: int):
         super(SingleTaskLearner, self).__init__(
@@ -54,7 +55,7 @@ class SingleTaskLearner(GenericLearner):
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
-        return optim.Adagrad(self.parameters(), lr=self.learning_rate)
+        return optim.Adadelta(self.parameters(), lr=self.learning_rate)
 
     def calculate_loss(self, prediction, correct_label):
         loss = self.loss_function(prediction, correct_label)

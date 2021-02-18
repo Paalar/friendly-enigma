@@ -9,17 +9,18 @@ python = "^3.8"
 torch = "^1.6.0"
 pandas = "^1.1.3"
 pytorch-lightning = "^1.0.4"
-edc = {git = "https://github.com/FluidSense/edc.git"}
 prompt-toolkit = "^3.0.8"
 PyYAML = "^5.3.1"
 ray = {extras = ["tune"], version = "^1.0.1"}
 tabulate = "^0.8.7"
+edc = {path = "../edc"}
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
 black = {version = "^20.8b1", allow-prereleases = true}
 rope = "^0.18.0"
 comet-ml = "^3.2.12"
+scipy = "^1.6.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

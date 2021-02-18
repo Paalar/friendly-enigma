@@ -17,7 +17,9 @@ class MultiTaskLearner(GenericLearner):
     def __init__(
         self, model_core: Net, input_length: int, output_length: Tuple[int, int]
     ):
-        super(MultiTaskLearner, self).__init__(heads=2, model_core=model_core)
+        super(MultiTaskLearner, self).__init__(
+            num_classes=[1, 23], model_core=model_core
+        )
         self.save_hyperparameters()
         # Hyperparameters
         self.learning_rate = config["mtl_learning_rate"]
@@ -104,7 +106,7 @@ class MultiTaskLearner(GenericLearner):
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
-        return optim.Adagrad(self.parameters(), lr=self.learning_rate)
+        return optim.Adadelta(self.parameters(), lr=self.learning_rate)
 
     def calculate_loss(self, prediction, correct_label, head=0, T=0):
         loss_function = self.loss_functions[head]

@@ -8,7 +8,7 @@ from models.core_model import Net
 
 
 class GenericLearner(pl.LightningModule, ABC):
-    def __init__(self, model_core: Net, heads: int = 1):
+    def __init__(self, model_core: Net, num_classes: int = [1]):
         super(GenericLearner, self).__init__()
         self.rest_of_model = model_core
         metrics = [
@@ -16,11 +16,20 @@ class GenericLearner(pl.LightningModule, ABC):
             pl.metrics.Precision,
             pl.metrics.Recall,
         ]
-        self.metrics = [[metric().to(get_device()) for metric in metrics] for head in range(heads)]
-        self.heads = heads
-        self.metrics[0].append(pl.metrics.FBeta(num_classes=1).to(get_device()))
-        if heads > 1:
-            self.metrics[1].append(pl.metrics.FBeta(num_classes=23).to(get_device()))
+        self.metrics = [
+            [metric().to(get_device()) for metric in metrics]
+            for head in range(len(num_classes))
+        ]
+        self.heads = len(num_classes)
+        for index, classes in enumerate(num_classes):
+            self.metrics[index].append(
+                pl.metrics.FBeta(num_classes=classes).to(get_device())
+            )
+            self.metrics[index].append(
+                pl.metrics.ConfusionMatrix(
+                    num_classes=2 if classes == 1 else classes
+                ).to(get_device())
+            )
 
     @abstractmethod
     def forward(self, data_input):
@@ -60,6 +69,7 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Precision/head-{head}/{label}", metric[1].compute())
         self.log(f"Recall/head-{head}/{label}", metric[2].compute())
         self.log(f"Fbeta/head-{head}/{label}", metric[3].compute())
+        metric[4].compute()
 
     def metrics_update(self, label, prediction, correct_label, head=0):
         metric = self.metrics[head]
@@ -75,3 +85,4 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Precision/head-{head}/{label}", metric[1](prediction, correct_label))
         self.log(f"Recall/head-{head}/{label}", metric[2](prediction, correct_label))
         self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, correct_label))
+        metric[4](prediction, correct_label)
