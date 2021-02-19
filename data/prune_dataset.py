@@ -57,12 +57,12 @@ def remove_rows_from_dataset(dataset: DataFrame, remove_percentage: int) -> Data
 
 def main():
     parser = ArgumentParser(description="Pruning dataset")
-    parser.add_argument("--prune", choices=["keep", "prune"])
+    parser.add_argument("--prune", choices=["yes", "no"])
     parser.add_argument("--remove", type=int, default="0")
     parser.add_argument("--name", type=str, default="heloc_dataset_pruned")
     args = parser.parse_args()
     heloc_dataset = read_csv()
-    pruned_dataset = prune_dataset(heloc_dataset) if args.prune == "prune" else heloc_dataset
+    pruned_dataset = prune_dataset(heloc_dataset) if args.prune == "yes" else heloc_dataset
     sliced_dataset = remove_rows_from_dataset(pruned_dataset, args.remove)
     save_csv(f"{args.name}.csv", sliced_dataset)
 
