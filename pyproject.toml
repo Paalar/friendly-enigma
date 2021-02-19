@@ -15,12 +15,17 @@ PyYAML = "^5.3.1"
 ray = {extras = ["tune"], version = "^1.0.1"}
 tabulate = "^0.8.7"
 scipy = "^1.6.0"
+tensorflow-probability = "^0.12.1"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
 black = {version = "^20.8b1", allow-prereleases = true}
 rope = "^0.18.0"
 comet-ml = "^3.2.12"
+sklearn = "^0.0"
+tensorflow = "^2.4.1"
+tqdm = "^4.56.2"
+recourse = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

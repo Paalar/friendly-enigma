@@ -26,6 +26,10 @@ class GenericLearner(pl.LightningModule, ABC):
     def forward(self, data_input):
         raise NotImplementedError
 
+    def predict(self, data_input):
+        data_input_torch = torch.tensor(data_input, dtype=torch.float)
+        return self.forward(data_input_torch).int()
+
     @abstractmethod
     def training_step(self, batch, batch_idx):
         raise NotImplementedError

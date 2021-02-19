@@ -86,7 +86,6 @@ def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, classifi
                     feedDict[tf_nodes['batch_size']] = args.batch_size
 
                     # Running VAE
-                    print("try vae")
                     _, X_list, loss, KL_z, KL_s, samples, log_p_x, p_params, q_params = session.run(
                         [tf_nodes['optim'],
                         tf_nodes['X'],
@@ -99,7 +98,6 @@ def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, classifi
                         tf_nodes['q_params']],
                         feed_dict=feedDict)
 
-                    print("vae success")
                     # Collect all samples, distirbution parameters and logliks in lists
                     if i == 0:
                         samples_list = [samples]
@@ -144,10 +142,10 @@ def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, classifi
                 error_train_samples = Helpers.error_computation(train_data_transformed, est_data_transformed, types_dict)
 
                 # Display logs per epoch step
-                if epoch % args.display == 0:
-                    print_loss(epoch, start_time, avg_loss / n_batches_train, avg_KL_s / n_batches_train,
-                           avg_KL_z / n_batches_train)
-                    print("")
+                # if epoch % args.display == 0:
+                #     print_loss(epoch, start_time, avg_loss / n_batches_train, avg_KL_s / n_batches_train,
+                #            avg_KL_z / n_batches_train)
+                #     print("")
 
             # Plot evolution of test loglik
                 loglik_per_variable = np.sum(np.concatenate(log_p_x_total, 1), 1) / n_samples_train
@@ -219,9 +217,9 @@ def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, classifi
 
             for i in tqdm(range(ncounterfactuals)):
 
-                s = (k, n_input)  # preallocate k spots; # inputs
+                counterfactual = (k, n_input)  # preallocate k spots; # inputs
                 sz = (k, args.dim_latent_z)
-                s = np.zeros(s)
+                counterfactual = np.zeros(counterfactual)
                 sz = np.zeros(sz)
                 ik = 0  # counter
 
@@ -260,7 +258,7 @@ def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, classifi
 
                     if  (count > max_step) == True:
                         sz = None
-                        s = None
+                        counterfactual = None
                         z = z_total_test[i].reshape(-1, args.dim_latent_z)
                         break
 
@@ -314,12 +312,12 @@ def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, classifi
                     if len(indices_adv) == 0:  # no candidate generated
                         l = h
                         h = l + step
-                    elif all(s[k - 1, :] == 0):  # not k candidates generated
+                    elif all(counterfactual[k - 1, :] == 0):  # not k candidates generated
 
                         indx = indices_adv[np.argmin(d_scale[indices_adv])]
                         assert (y_tilde[indx] != 1)
 
-                        s[ik, :] = x_tilde[indx, :]
+                        counterfactual[ik, :] = x_tilde[indx, :]
                         sz[ik, :] = z_tilde[indx, :]
                         z = z_total_test[i].reshape(-1, args.dim_latent_z)
 
@@ -331,7 +329,7 @@ def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, classifi
 
                 data_concat.append(np.concatenate(data_list, axis=1))
                 data_concat_c.append(np.concatenate(data_list_c, axis=1))
-                counterfactuals.append(s)
+                counterfactuals.append(counterfactual)
                 latent_tilde.append(sz)
                 latent.append(z)
 

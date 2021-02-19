@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-heloc = "./heloc_dataset_v1.csv"
+heloc = "./heloc_dataset_v1_pruned.csv"
 
 df = pd.read_csv(heloc)
 records = df.to_numpy()
