@@ -89,7 +89,6 @@ class MultiTaskLearner(GenericLearner):
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
         self.log("loss_validate", loss_prediction)
-        self.log("loss_validate", loss_prediction)
         return loss_prediction + loss_explanation
 
     def test_step(self, batch, _):

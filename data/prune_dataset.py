@@ -46,27 +46,24 @@ def prune_dataset(dataset: DataFrame) -> DataFrame:
         pruned_dataset.loc[index, columns] = row
     return pruned_dataset
 
-def remove_rows_from_dataset(dataset: DataFrame, rows_to_skip: int) -> DataFrame:
-    if rows_to_skip == 0:
+def remove_rows_from_dataset(dataset: DataFrame, remove_percentage: int) -> DataFrame:
+    if remove_percentage == 0:
         return dataset
-    sliced_dataset = dataset.copy()
-    counter = 1
-    for index, value in enumerate(sliced_dataset.iterrows()):
-        counter = 1 if rows_to_skip + 1 == counter else counter
-        if rows_to_skip == counter:
-            sliced_dataset = sliced_dataset.drop(index)
-        counter += 1
+    shuffled_dataset = dataset.copy().sample(frac=1).reset_index(drop=True)
+    dataset_length = len(shuffled_dataset)
+    rows_to_be_removed = round(dataset_length * (remove_percentage / 100))
+    sliced_dataset = shuffled_dataset[rows_to_be_removed:]
     return sliced_dataset
 
 def main():
     parser = ArgumentParser(description="Pruning dataset")
     parser.add_argument("--prune", choices=["keep", "prune"])
-    parser.add_argument("--skip", type=int, default="0")
+    parser.add_argument("--remove", type=int, default="0")
     parser.add_argument("--name", type=str, default="heloc_dataset_pruned")
     args = parser.parse_args()
     heloc_dataset = read_csv()
     pruned_dataset = prune_dataset(heloc_dataset) if args.prune == "prune" else heloc_dataset
-    sliced_dataset = remove_rows_from_dataset(pruned_dataset, args.skip)
+    sliced_dataset = remove_rows_from_dataset(pruned_dataset, args.remove)
     save_csv(f"{args.name}.csv", sliced_dataset)
 
 
