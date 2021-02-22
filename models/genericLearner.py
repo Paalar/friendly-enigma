@@ -8,7 +8,7 @@ from models.core_model import Net
 
 
 class GenericLearner(pl.LightningModule, ABC):
-    def __init__(self, model_core: Net, num_classes = [1]):
+    def __init__(self, model_core: Net, num_classes: int = [1]):
         super(GenericLearner, self).__init__()
         self.rest_of_model = model_core
         metrics = [
@@ -60,6 +60,7 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Precision/head-{head}/{label}", metric[1].compute())
         self.log(f"Recall/head-{head}/{label}", metric[2].compute())
         self.log(f"Fbeta/head-{head}/{label}", metric[3].compute())
+        metric[4].compute()
 
     def metrics_update(self, label, prediction, correct_label, head=0):
         metric = self.metrics[head]
@@ -77,3 +78,4 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Precision/head-{head}/{label}", metric[1](prediction, correct_label))
         self.log(f"Recall/head-{head}/{label}", metric[2](prediction, correct_label))
         self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, correct_label))
+        metric[4](prediction, correct_label)
