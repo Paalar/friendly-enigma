@@ -8,6 +8,7 @@ from models.core_model import Net
 from models.genericLearner import GenericLearner
 from utils.custom_torch import zeros
 
+
 class SingleTaskLearner(GenericLearner):
     def __init__(self, model_core: Net, input_length: int, output_length: int):
         super(SingleTaskLearner, self).__init__(

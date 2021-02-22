@@ -1,8 +1,8 @@
 cpu_workers: 8
 
 batch_size: 69
-stl_epochs: 2
-mtl_epochs: 2
+stl_epochs: 20
+mtl_epochs: 200
 
 nodes_before_split: 420
 stl_learning_rate: 0.01
@@ -11,6 +11,6 @@ mtl_learning_rate: 0.01
 hidden_layers: [64, 128]
 # The activations list needs to be the length of hidden_layers + 1
 # as the last layer is provided by nodes_before_split
-activations: ["relu", "relu", "relu"]
+activations: ['relu', 'relu', 'relu']
 # weights or gradients
 loss_converge_method: weights
