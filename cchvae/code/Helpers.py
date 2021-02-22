@@ -23,15 +23,15 @@ import argparse
 def getArgs(argv=None):
     parser = argparse.ArgumentParser(description='Default parameters of the models', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--batch_size', type=int, default=100, help='Size of the batches')
-    parser.add_argument('--epochs', type=int, default=10, help='Number of epochs of the simulations')
+    parser.add_argument('--epochs', type=int, default=10000, help='Number of epochs of the simulations')
     parser.add_argument('--train', type=int, default=1, help='Training model flag')
     parser.add_argument('--display', type=int, default=1, help='Display option flag')
     parser.add_argument('--dim_latent_s', type=int, default=3, help='Dimension of the categorical space')
     parser.add_argument('--dim_latent_z', type=int, default=2, help='Dimension of the Z latent space')
     parser.add_argument('--dim_latent_y', type=int, default=5, help='Dimension of the Y latent space')
     parser.add_argument('--dim_latent_y_partition', type=int, nargs='+', help='Partition of the Y latent space')
-    parser.add_argument('--types_file', type=str, default='cchvae/data/heloc/heloc_types_alt.csv', help='File with the types of the data')
-    parser.add_argument('--types_file_c', type=str, default='cchvae/data/heloc/heloc_types_c_alt.csv', help='File with the types of the conditioning data')
+    parser.add_argument('--types_file', type=str, default='cchvae/data/heloc/heloc_types.csv', help='File with the types of the data')
+    parser.add_argument('--types_file_c', type=str, default='cchvae/data/heloc/heloc_types_c.csv', help='File with the types of the conditioning data')
     parser.add_argument('--norm_latent_space', type=int, default=2, help='To measure distance between latent variables')
     parser.add_argument('--step_size', type=float, default=0.5, help='Step size for Random Search')
     parser.add_argument('--search_samples', type=int, default=1000, help='Number search samples for counterfactual search')
@@ -264,9 +264,7 @@ def batch_normalization(batch_data_list, types_list, batch_size):
     noisy_data = []
 
     for i, d in enumerate(batch_data_list):
-
         observed_data = d
-
         if types_list[i]['type'] == 'real':
             # We transform the data to a gaussian with mean 0 and std 1
             data_mean, data_var = tf.nn.moments(x=observed_data, axes=0)

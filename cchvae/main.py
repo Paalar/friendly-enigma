@@ -9,8 +9,8 @@ from cchvae.code.Sampling import sampling
 from models.singleTaskLearner import SingleTaskLearner
 
 types_url = "./cchvae/data/heloc"
-types_dict_file_name = f"{types_url}/heloc_types_alt.csv"
-types_dict_c_file_name = f"{types_url}/heloc_types_c_alt.csv"
+types_dict_file_name = f"{types_url}/heloc_types.csv"
+types_dict_c_file_name = f"{types_url}/heloc_types_c.csv"
 heloc_x_file_name = f"{types_url}/heloc_x.csv"
 heloc_x_c_file_name = f"{types_url}/heloc_x_c.csv"
 heloc_y_file_name = f"{types_url}/heloc_y.csv"
