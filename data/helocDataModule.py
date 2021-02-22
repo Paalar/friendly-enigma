@@ -20,7 +20,7 @@ class HelocDataModule(LightningDataModule):
         self.batch_size = config["batch_size"] if type(config["batch_size"]) is int else batch_size
 
     def prepare_data(self):
-        CSV_FILE = "data/heloc_dataset_v1.csv"
+        CSV_FILE = "data/heloc_dataset_v1_pruned.csv"
         self.data = pd.read_csv(CSV_FILE)
         self.row_length = self.data.shape[1] - 1  # Remove predictor
         self.labels = self.data.columns[1:]
