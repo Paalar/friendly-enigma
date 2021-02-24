@@ -12,6 +12,8 @@ from utils.custom_torch import zeros, ones
 def categorical_cross_entropy(explanation, true_explanation):
     return F.cross_entropy(explanation, torch.max(true_explanation, 1)[1])
 
+def nll(explanation, true_explanation):
+    return nn.NLLLoss()(explanation, torch.max(true_explanation, 1)[1])
 
 class MultiTaskLearner(GenericLearner):
     def __init__(
@@ -29,7 +31,7 @@ class MultiTaskLearner(GenericLearner):
         self.prediction_head = nn.Linear(input_length, output_length[0])
         self.explanation_head = nn.Linear(input_length, output_length[1])
         # Loss functions per head
-        self.loss_functions = [F.mse_loss, categorical_cross_entropy]
+        self.loss_functions = [F.mse_loss, nll]
         self.prediction_head.register_forward_hook(self.forward_hook)
 
     def forward(self, data_input):
