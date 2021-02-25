@@ -7,6 +7,7 @@ from cchvae.code.Helpers import getArgs
 from cchvae.code.Sampling import sampling
 
 from models.singleTaskLearner import SingleTaskLearner
+from config import config
 
 types_url = "./cchvae/data/heloc"
 types_dict_file_name = f"{types_url}/heloc_types.csv"
@@ -57,7 +58,10 @@ def reshape_counterfactuals(counterfactuals):
 
 def rearrange_counterfactuals(counterfactuals):
     # Change location of 3 and 2
-    permutation = [0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+    locked_features = config["cchvae_locked_features"]
+    locked_permutation = [feature - 1 for feature in locked_features]
+    free_permutation = [i for i in range(23) if i not in locked_permutation]
+    permutation = locked_permutation + free_permutation
     idx = np.empty_like(permutation)
     idx[permutation] = np.arange(len(permutation))
     rearranged_counterfactuals = counterfactuals[:, idx]
