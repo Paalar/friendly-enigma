@@ -71,14 +71,13 @@ class GenericLearner(pl.LightningModule, ABC):
         if head == 1:
             self.log(
                 f"Accuracy/head-{head}/{label}",
-                metric[0](prediction, torch.max(correct_label, 1)[1]),
+                metric[0](prediction, correct_label),
             )
-            # metric[4].update(torch.max(prediction,1)[1], torch.max(correct_label,1)[1])
         else:
             self.log(
                 f"Accuracy/head-{head}/{label}", metric[0](prediction, correct_label)
             )
-            # metric[4].update(prediction, correct_label)
+        # metric[4].update(prediction, correct_label)
         self.log(f"Precision/head-{head}/{label}", metric[1](prediction, correct_label))
         self.log(f"Recall/head-{head}/{label}", metric[2](prediction, correct_label))
         self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, correct_label))

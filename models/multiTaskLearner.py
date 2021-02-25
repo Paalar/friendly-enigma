@@ -25,13 +25,11 @@ class MultiTaskLearner(GenericLearner):
         self.save_hyperparameters()
         # Hyperparameters
         self.learning_rate = config["mtl_learning_rate"]
-        # https://towardsdatascience.com/multi-task-learning-with-pytorch-and-fastai-6d10dc7ce855
-        # self.log_vars = nn.Parameter(torch.zeros((2)))
         # Heads
         self.prediction_head = nn.Linear(input_length, output_length[0])
         self.explanation_head = nn.Linear(input_length, output_length[1])
         # Loss functions per head
-        self.loss_functions = [F.mse_loss, nll]
+        self.loss_functions = [F.binary_cross_entropy, F.mse_loss]
         self.prediction_head.register_forward_hook(self.forward_hook)
 
     def forward(self, data_input):
@@ -58,16 +56,16 @@ class MultiTaskLearner(GenericLearner):
             explanation_label,
         ) = self.predict_batch(batch)
 
-        loss_convergence = (
-            self.converge_gradients(prediction, explanation)
-            if config["loss_converge_method"] == "gradients"
-            else self.converge_weights(explanation)
-        )
+        # loss_convergence = (
+        #     self.converge_gradients(prediction, explanation)
+        #     if config["loss_converge_method"] == "gradients"
+        #     else self.converge_weights(explanation)
+        # )
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
         self.log("Loss/train-prediction", loss_prediction)
         self.log("Loss/train-explanation", loss_explanation)
-        self.log("Loss/train-head-difference", loss_convergence)
+        # self.log("Loss/train-head-difference", loss_convergence)
         self.metrics_update("train-step", prediction, prediction_label)
         self.metrics_update("train-step", explanation, explanation_label, head=1)
         pred_weight = (
@@ -78,7 +76,7 @@ class MultiTaskLearner(GenericLearner):
         )
         return (
             pred_weight * (loss_prediction + loss_explanation)
-            + alignment_weight * loss_convergence
+            #+ alignment_weight * loss_convergence
         )
 
     def validation_step(self, batch, _):

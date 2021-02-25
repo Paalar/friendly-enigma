@@ -19,7 +19,7 @@ class CchvaeDataset(HELOCDataset):
     def split_explanation_label(self, data):
         counterfactual_label = data.pop("counterfactual delta")
         labels_as_list_entries = [
-            torch.tensor(list(map(int, label[1 : len(label) - 1].split(" "))))
+            torch.tensor(list(map(float, label[1 : len(label) - 1].split(" "))))
             for label in counterfactual_label
         ]
         return data, labels_as_list_entries
