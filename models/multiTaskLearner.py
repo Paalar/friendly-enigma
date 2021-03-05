@@ -12,8 +12,10 @@ from utils.custom_torch import zeros, ones
 def categorical_cross_entropy(explanation, true_explanation):
     return F.cross_entropy(explanation, torch.max(true_explanation, 1)[1])
 
+
 def nll(explanation, true_explanation):
     return nn.NLLLoss()(explanation, torch.max(true_explanation, 1)[1])
+
 
 class MultiTaskLearner(GenericLearner):
     def __init__(
@@ -37,7 +39,6 @@ class MultiTaskLearner(GenericLearner):
         prediction = self.prediction_head(rest_output)
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
-        explanation = F.softmax(explanation)
         return prediction, explanation
 
     def predict_batch(self, batch):
@@ -74,10 +75,7 @@ class MultiTaskLearner(GenericLearner):
         alignment_weight = (
             1  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
         )
-        return (
-            pred_weight * (loss_prediction + loss_explanation)
-            #+ alignment_weight * loss_convergence
-        )
+        return loss_prediction + loss_explanation
 
     def validation_step(self, batch, _):
         (
@@ -88,7 +86,7 @@ class MultiTaskLearner(GenericLearner):
         ) = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
-        self.log("loss_validate", loss_prediction)
+        self.log("loss_validate", loss_prediction + loss_explanation)
         return loss_prediction + loss_explanation
 
     def test_step(self, batch, _):
@@ -110,8 +108,7 @@ class MultiTaskLearner(GenericLearner):
     def calculate_loss(self, prediction, correct_label, head=0, T=0):
         loss_function = self.loss_functions[head]
         loss = loss_function(prediction, correct_label)
-        precision = 1  # torch.exp(-self.log_vars[head])
-        return precision * loss  # + self.log_vars[head] + T
+        return loss  # + self.log_vars[head] + T
 
     def converge_gradients(self, prediction, explanation):
         (layer_pred,) = autograd.grad(
