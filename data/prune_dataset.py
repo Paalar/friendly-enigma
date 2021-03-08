@@ -1,5 +1,5 @@
 import pandas as pd
-
+from tqdm import tqdm
 from argparse import ArgumentParser
 from pandas import DataFrame
 
@@ -26,24 +26,26 @@ def prune_dataset(dataset: DataFrame) -> DataFrame:
     pruned_dataset = dataset.copy()
     columns = pruned_dataset.columns
     columns = columns.drop("RiskPerformance")
-    for index, value in enumerate(pruned_dataset.iterrows()):
-        if index % 1000 == 0:
-            save_csv("heloc_dataset_pruned.csv", pruned_dataset)
-        _, content = value
-        print(f"Row #{index}")
-        # Rows with -9 are all invalid data
-        row = content
-        if (row[columns] == -9).all():
-            pruned_dataset = pruned_dataset.drop(index)
-            continue
-        # Row, columns with value -7, -8, -9 are also invalid
-        if (row[columns] == -9).any():
-            row = prune_value(row[columns], -9, 0)
-        if (row[columns] == -8).any():
-            row = prune_value(row[columns], -8, 0)
-        if (row[columns] == -7).any():
-            row = prune_value(row[columns], -7, 0)
-        pruned_dataset.loc[index, columns] = row
+    progressbar_length = len(dataset.values)
+    with tqdm(total=progressbar_length) as progressbar:
+        for index, value in enumerate(pruned_dataset.iterrows()):
+            if index % 1000 == 0:
+                save_csv("heloc_dataset_pruned.csv", pruned_dataset)
+            _, content = value
+            # Rows with -9 are all invalid data
+            row = content
+            if (row[columns] == -9).all():
+                pruned_dataset = pruned_dataset.drop(index)
+                continue
+            # Row, columns with value -7, -8, -9 are also invalid
+            if (row[columns] == -9).any():
+                row = prune_value(row[columns], -9, 0)
+            if (row[columns] == -8).any():
+                row = prune_value(row[columns], -8, 0)
+            if (row[columns] == -7).any():
+                row = prune_value(row[columns], -7, 0)
+            pruned_dataset.loc[index, columns] = row
+            progressbar.update(1)
     return pruned_dataset
 
 def remove_rows_from_dataset(dataset: DataFrame, remove_percentage: int) -> DataFrame:
