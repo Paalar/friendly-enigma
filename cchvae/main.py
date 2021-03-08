@@ -69,7 +69,6 @@ def rearrange_counterfactuals(counterfactuals):
     return rearranged_counterfactuals
 
 def calculate_counterfactual_delta(counterfactuals):
-    original_dataset = pd.read_csv("./data/heloc_dataset_v1_pruned.csv").values
     delta = []
     y = original_dataset[:,0]
     predictors = original_dataset[:,1:]

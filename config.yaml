@@ -1,19 +1,19 @@
 cpu_workers: 8
 
 batch_size: 69
-stl_epochs: 20
-mtl_epochs: 200
+stl_epochs: 5
+mtl_epochs: 5
 
 nodes_before_split: 420
 stl_learning_rate: 0.01
 mtl_learning_rate: 0.01
 
-hidden_layers: [64, 128]
+hidden_layers: [32, 64, 256, 512, 256, 64]
 # The activations list needs to be the length of hidden_layers + 1
 # as the last layer is provided by nodes_before_split
-activations: ['relu', 'relu', 'relu']
+activations: ["relu", "relu", "relu", "relu", "relu", "relu", "relu"]
 # weights or gradients
 loss_converge_method: weights
 
 # data/cchvae_split.py
-cchvae_locked_features: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+cchvae_locked_features: [1, 2, 4]
