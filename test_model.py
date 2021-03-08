@@ -10,6 +10,7 @@ from pytorch_lightning import Trainer, metrics
 from models.singleTaskLearner import SingleTaskLearner
 from models.multiTaskLearner import MultiTaskLearner
 from data.helocDataModule import HelocDataModule
+from data.cchvaeDataModule import CchvaeDataModule
 from data.explanationDataModule import ExplanationDataModule
 from utils.print_colors import green_text, red_text, create_cond_print
 
@@ -45,15 +46,18 @@ else:
     sys.exit(1)
 
 
-model_is_mtl = checkpoint_file.split("/")[1].startswith("mtl")
-print(f"Recognized model as {'MTL' if model_is_mtl else 'STL' }.")
-model = (
-    MultiTaskLearner.load_from_checkpoint(checkpoint_file)
-    if model_is_mtl
-    else SingleTaskLearner.load_from_checkpoint(checkpoint_file)
-)
+model_types = {
+    "mtl": (MultiTaskLearner, ExplanationDataModule),
+    "stl": (SingleTaskLearner, HelocDataModule),
+    "cchvae": (MultiTaskLearner, CchvaeDataModule),
+}
+model_name = checkpoint_file.split("/")[1].split("-")[0]
+model_type = model_types[model_name]
 
-data_module = ExplanationDataModule() if model_is_mtl else HelocDataModule()
+print(f"Recognized model as {model_name}.")
+model = model_type[0].load_from_checkpoint(checkpoint_file)
+
+data_module = model_type[1]()
 data_module.prepare_data()
 data_module.setup("test")
 trainer = Trainer()
