@@ -8,4 +8,4 @@ def zeros(*args):
     return torch.zeros(*args, device=get_device())
 
 def ones(*args):
-    return torch.ones(*arghs, device=get_device())
+    return torch.ones(*args, device=get_device())
