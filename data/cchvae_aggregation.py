@@ -7,7 +7,7 @@ def get_file(filename):
     dataDir = Path(__file__).parent.absolute()
     return Path(f"{dataDir}/{filename}").resolve()
 
-columns = pd.read_csv(get_file("./heloc_dataset_v1.csv")).columns
+columns = pd.read_csv(get_file("./heloc_dataset_v1_pruned.csv")).columns
 counterfactuals = pd.read_csv(get_file("./counterfactuals.csv"), header=None)
 delta_counterfactuals = pd.read_csv(get_file("./delta_counterfactuals.csv"), header=None)
 aggregated_counterfactuals = []

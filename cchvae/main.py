@@ -9,13 +9,13 @@ from cchvae.code.Sampling import sampling
 from models.singleTaskLearner import SingleTaskLearner
 from config import config
 
-types_url = "./cchvae/data/heloc"
+types_url = "./cchvae/data/heloc/1_2_4"
 types_dict_file_name = f"{types_url}/heloc_types.csv"
 types_dict_c_file_name = f"{types_url}/heloc_types_c.csv"
 heloc_x_file_name = f"{types_url}/heloc_x.csv"
 heloc_x_c_file_name = f"{types_url}/heloc_x_c.csv"
 heloc_y_file_name = f"{types_url}/heloc_y.csv"
-original_dataset = pd.read_csv("./data/aggregated_counterfactuals.csv").values
+original_dataset = pd.read_csv("./data/heloc_dataset_v1_pruned.csv").values
 
 FIRST_HALF = "FIRST"
 SECOND_HALF = "SECOND"

@@ -1,5 +1,6 @@
 import torch.nn.functional as F
 import torch
+from torch.utils import data
 
 from config import config
 from torch import nn, optim, autograd
@@ -31,14 +32,16 @@ class MultiTaskLearner(GenericLearner):
         self.prediction_head = nn.Linear(input_length, output_length[0])
         self.explanation_head = nn.Linear(input_length, output_length[1])
         # Loss functions per head
-        self.loss_functions = [F.binary_cross_entropy, F.mse_loss]
+        self.loss_functions = [F.binary_cross_entropy, categorical_cross_entropy]
         self.prediction_head.register_forward_hook(self.forward_hook)
 
     def forward(self, data_input):
+        data_input = data_input.to(torch.float32) # C-CHVAE
         rest_output = self.rest_of_model(data_input)
         prediction = self.prediction_head(rest_output)
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
+        # explanation = torch.sigmoid(explanation)
         return prediction, explanation
 
     def predict_batch(self, batch):
@@ -57,11 +60,11 @@ class MultiTaskLearner(GenericLearner):
             explanation_label,
         ) = self.predict_batch(batch)
 
-        # loss_convergence = (
-        #     self.converge_gradients(prediction, explanation)
-        #     if config["loss_converge_method"] == "gradients"
-        #     else self.converge_weights(explanation)
-        # )
+        loss_convergence = (
+            self.converge_gradients(prediction, explanation)
+            if config["loss_converge_method"] == "gradients"
+            else self.converge_weights(explanation)
+        )
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
         self.log("Loss/train-prediction", loss_prediction)
@@ -70,12 +73,16 @@ class MultiTaskLearner(GenericLearner):
         self.metrics_update("train-step", prediction, prediction_label)
         self.metrics_update("train-step", explanation, explanation_label, head=1)
         pred_weight = (
-            1  # 0.2 if self.current_epoch > 100 else 50 / (self.current_epoch + 1)
+            0.2  # 0.2 if self.current_epoch > 100 else 50 / (self.current_epoch + 1)
         )
         alignment_weight = (
-            1  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
+            0.8  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
         )
-        return loss_prediction + loss_explanation
+        return (
+            pred_weight * (loss_prediction + loss_explanation)
+            + alignment_weight * loss_convergence
+        )
+
 
     def validation_step(self, batch, _):
         (
@@ -103,7 +110,7 @@ class MultiTaskLearner(GenericLearner):
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
-        return optim.Adadelta(self.parameters(), lr=self.learning_rate)
+        return optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def calculate_loss(self, prediction, correct_label, head=0, T=0):
         loss_function = self.loss_functions[head]
@@ -142,7 +149,7 @@ class MultiTaskLearner(GenericLearner):
         positive_xor = torch.logical_xor(tensor1_positive, tensor2_positive)
         negative_xor = torch.logical_xor(tensor1_negative, tensor2_negative)
 
-        converge_distances = tensor2 * positive_xor.float()
+        converge_distances = (tensor2 * positive_xor.float() + tensor2 * negative_xor.float()) / 2
         explanation_prefix_convergence_distance = F.mse_loss(
             converge_distances, zeros(converge_distances.size())
         )

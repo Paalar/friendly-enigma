@@ -1,12 +1,12 @@
 cpu_workers: 8
 
 batch_size: 69
-stl_epochs: 5
-mtl_epochs: 5
+stl_epochs: 20
+mtl_epochs: 50
 
 nodes_before_split: 420
 stl_learning_rate: 0.01
-mtl_learning_rate: 0.01
+mtl_learning_rate: 0.0004
 
 hidden_layers: [32, 64, 256, 512, 256, 64]
 # The activations list needs to be the length of hidden_layers + 1
