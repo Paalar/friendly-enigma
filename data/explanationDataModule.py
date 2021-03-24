@@ -12,7 +12,8 @@ class ExplanationDataModule(HelocDataModule):
 
     def prepare_data(self):
         super().prepare_data()
-        EXPLANATIONS_CSV_FILE = "data/explanations.csv"
+        # EXPLANATIONS_CSV_FILE = "data/explanations.csv"
+        EXPLANATIONS_CSV_FILE = "data/counterfactual_explanations.csv"
         explanation_data = pd.read_csv(EXPLANATIONS_CSV_FILE)
         explanation_label = explanation_data.iloc[:, 1]
         self.data.insert(0, "explanation set", explanation_label)

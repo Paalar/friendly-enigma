@@ -8,14 +8,11 @@ class ExplanationDataset(HELOCDataset):
         dataset, explanations = self.split_explanation_label(dataset)
         self.explanations = explanations
         super().__init__(dataset)
-        # dataset, predictor = self.split_predictor(dataset)
-        # self.predictors = predictor
-        # self.values = torch.tensor(dataset.values, dtype=torch.float)
 
     def __getitem__(self, index):
         return (
-            self.values[index],
-            self.predictors[index].unsqueeze(0),
+            self.predictors[index],
+            self.targets[index].unsqueeze(0),
             self.explanations[index],
         )
 
