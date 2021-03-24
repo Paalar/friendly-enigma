@@ -35,7 +35,7 @@ entrypoints==0.3; python_version >= "2.7"
 everett==1.0.3; python_version >= "3.0"
 filelock==3.0.12
 flatbuffers==1.12
-fsspec==0.8.5; python_version > "3.6"
+fsspec==0.8.7; python_version > "3.6"
 future==0.18.2; python_version >= "2.6" and python_full_version < "3.0.0" or python_full_version >= "3.3.0"
 gast==0.3.3; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0"
 google-api-core==1.26.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0"
@@ -151,6 +151,7 @@ testpath==0.4.4
 threadpoolctl==2.1.0; python_version >= "3.5"
 toml==0.10.2; python_version >= "2.6" and python_full_version < "3.0.0" or python_full_version >= "3.3.0"
 torch==1.7.1; python_full_version >= "3.6.2"
+torchmetrics==0.2.0; python_version >= "3.6"
 tornado==6.1; python_version >= "3.5"
 tqdm==4.57.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.4.0")
 traitlets==5.0.5; python_version >= "3.7"
