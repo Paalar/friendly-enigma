@@ -41,7 +41,7 @@ class MultiTaskLearner(GenericLearner):
         prediction = self.prediction_head(rest_output)
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
-        # explanation = torch.sigmoid(explanation)
+        explanation = F.softmax(explanation, dim=-1)
         return prediction, explanation
 
     def predict_batch(self, batch):
@@ -94,7 +94,7 @@ class MultiTaskLearner(GenericLearner):
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
         self.log("loss_validate", loss_prediction + loss_explanation)
-        return loss_prediction + loss_explanation
+        # return loss_prediction + loss_explanation
 
     def test_step(self, batch, _):
         (
@@ -110,7 +110,7 @@ class MultiTaskLearner(GenericLearner):
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
-        return optim.Adam(self.parameters(), lr=self.learning_rate)
+        return optim.Adadelta(self.parameters(), lr=self.learning_rate)
 
     def calculate_loss(self, prediction, correct_label, head=0, T=0):
         loss_function = self.loss_functions[head]

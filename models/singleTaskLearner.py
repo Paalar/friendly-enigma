@@ -22,7 +22,7 @@ class SingleTaskLearner(GenericLearner):
         # Heads
         self.prediction = nn.Linear(input_length, output_length)
         # Loss function
-        self.loss_function = F.mse_loss
+        self.loss_function = F.binary_cross_entropy
 
     def forward(self, data_input):
         rest_output = self.rest_of_model(data_input)

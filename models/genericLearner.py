@@ -1,9 +1,10 @@
 from abc import abstractmethod, ABC
+
 import pytorch_lightning as pl
 import torch
-from utils.custom_torch import get_device
-from config import config
+import torchmetrics as tm
 
+from utils.custom_torch import get_device
 from models.core_model import Net
 
 
@@ -12,9 +13,9 @@ class GenericLearner(pl.LightningModule, ABC):
         super(GenericLearner, self).__init__()
         self.rest_of_model = model_core
         metrics = [
-            pl.metrics.Accuracy,
-            pl.metrics.Precision,
-            pl.metrics.Recall,
+            tm.Accuracy,
+            tm.Precision,
+            tm.Recall,
         ]
         self.metrics = [[metric().to(get_device()) for metric in metrics] for head in range(len(num_classes))]
         self.heads = len(num_classes)
@@ -66,19 +67,37 @@ class GenericLearner(pl.LightningModule, ABC):
         self.log(f"Fbeta/head-{head}/{label}", metric[3].compute())
         # metric[4].compute()
 
-    def metrics_update(self, label, prediction, correct_label, head=0):
+    def metrics_update(self, label, prediction, target, head=0):
         metric = self.metrics[head]
+        # print(f"prediction={prediction}, correct={target}")
         if head == 1:
             self.log(
                 f"Accuracy/head-{head}/{label}",
-                metric[0](prediction, correct_label),
+                metric[0](prediction, torch.max(target, 1)[1]),
             )
+            self.log(f"Precision/head-{head}/{label}", metric[1](prediction, torch.max(target, 1)[1]))
+            self.log(f"Recall/head-{head}/{label}", metric[2](prediction, torch.max(target, 1)[1]))
+            self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, torch.max(target, 1)[1]))
         else:
+            target = target.to(torch.int)
             self.log(
-                f"Accuracy/head-{head}/{label}", metric[0](prediction, correct_label)
+                f"Accuracy/head-{head}/{label}", metric[0](prediction, target)
             )
+            self.log(f"Precision/head-{head}/{label}", metric[1](prediction, target))
+            self.log(f"Recall/head-{head}/{label}", metric[2](prediction, target))
+            self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, target))
         # metric[4].update(prediction, correct_label)
-        self.log(f"Precision/head-{head}/{label}", metric[1](prediction, correct_label))
-        self.log(f"Recall/head-{head}/{label}", metric[2](prediction, correct_label))
-        self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, correct_label))
         # metric[4](prediction, correct_label)
+
+    def print_gradients(self):
+        for name, parameter in self.named_parameters():
+            gradient = parameter.grad
+            if gradient == None:
+                print(f"Parameter {name} is none")
+                continue
+            pred = torch.where(gradient == 0, 0,1)
+            if torch.sum(pred) == 0:
+                print(f"Index {self.current_epoch} - Parameter {name}'s gradients are summed to 0.")
+
+    def on_before_zero_grad(self, optimizer) -> None:
+        self.print_gradients()
