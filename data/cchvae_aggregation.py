@@ -10,8 +10,8 @@ def get_file(filename):
 columns = pd.read_csv(get_file("./heloc_dataset_v1_pruned.csv")).columns
 counterfactuals = pd.read_csv(get_file("./counterfactuals.csv"), header=None)
 delta_counterfactuals = pd.read_csv(get_file("./delta_counterfactuals.csv"), header=None)
-aggregated_counterfactuals = []
-aggregated_delta_counterfactuals = []
+augmented_counterfactuals = []
+augmented_delta_counterfactuals = []
 progressbar_length = len(delta_counterfactuals.values)
 
 
@@ -34,11 +34,11 @@ with tqdm(total=progressbar_length) as progressbar:
             applied_zeroed_delta[index] = delta
             new_counterfactual_with_applied_delta = np.add(new_counterfactual, delta_to_be_applied[1:])
             new_counterfactual_with_applied_delta = np.insert(new_counterfactual_with_applied_delta, 0, delta_row[0])
-            aggregated_counterfactuals.append(new_counterfactual_with_applied_delta)
-            aggregated_delta_counterfactuals.append(applied_zeroed_delta)
+            augmented_counterfactuals.append(new_counterfactual_with_applied_delta)
+            augmented_delta_counterfactuals.append(applied_zeroed_delta)
         progressbar.update(1)
 
-df_c = pd.DataFrame(data=aggregated_counterfactuals, columns=columns)
-df_dc = pd.DataFrame(data=aggregated_delta_counterfactuals, columns=columns)
-df_c.to_csv("aggregated_counterfactuals.csv", index=False)
-df_dc.to_csv("aggregated_delta_counterfactuals.csv", index=False, header=None)
+df_c = pd.DataFrame(data=augmented_counterfactuals, columns=columns)
+df_dc = pd.DataFrame(data=augmented_delta_counterfactuals, columns=columns)
+df_c.to_csv("augmented_counterfactuals.csv", index=False)
+df_dc.to_csv("augmentted_delta_counterfactuals.csv", index=False, header=None)

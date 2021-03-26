@@ -69,7 +69,6 @@ class GenericLearner(pl.LightningModule, ABC):
 
     def metrics_update(self, label, prediction, target, head=0):
         metric = self.metrics[head]
-        # print(f"prediction={prediction}, correct={target}")
         if head == 1:
             self.log(
                 f"Accuracy/head-{head}/{label}",
@@ -99,5 +98,5 @@ class GenericLearner(pl.LightningModule, ABC):
             if torch.sum(pred) == 0:
                 print(f"Index {self.current_epoch} - Parameter {name}'s gradients are summed to 0.")
 
-    def on_before_zero_grad(self, optimizer) -> None:
-        self.print_gradients()
+    # def on_before_zero_grad(self, optimizer) -> None:
+    #     self.print_gradients()
