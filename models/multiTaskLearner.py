@@ -15,7 +15,8 @@ def categorical_cross_entropy(explanation, true_explanation):
 
 
 def nll(explanation, true_explanation):
-    return nn.NLLLoss()(explanation, torch.max(true_explanation, 1)[1])
+    w = torch.tensor([0.,0.,7.,0.,7.,2.,2.,6.,6.,2.,3.,7.,4.,7.,6.,4.,4.,7.,7.,5.,4.,3.,7.])
+    return nn.NLLLoss(weight=w)(explanation, torch.max(true_explanation, 1)[1])
 
 
 class MultiTaskLearner(GenericLearner):
@@ -32,7 +33,7 @@ class MultiTaskLearner(GenericLearner):
         self.prediction_head = nn.Linear(input_length, output_length[0])
         self.explanation_head = nn.Linear(input_length, output_length[1])
         # Loss functions per head
-        self.loss_functions = [F.binary_cross_entropy, categorical_cross_entropy]
+        self.loss_functions = [F.binary_cross_entropy, nll]
         self.prediction_head.register_forward_hook(self.forward_hook)
 
     def forward(self, data_input):
