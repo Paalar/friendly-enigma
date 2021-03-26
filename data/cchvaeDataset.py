@@ -13,10 +13,15 @@ class CchvaeDataset(HELOCDataset):
         super().__init__(dataset)
 
     def __getitem__(self, index):
+        # return (
+        #     self.prediction_data.original_labels[index],
+        #     self.targets[index].unsqueeze(0),
+        #     self.explanation_labels.original_labels[index]
+        # )
         return (
-            self.prediction_data.original_labels[index],
+            self.prediction_data.labels[index],
             self.targets[index].unsqueeze(0),
-            self.explanation_labels.original_labels[index]
+            self.explanation_labels.labels[index]
         )
 
     def split_explanation_label(self, data):

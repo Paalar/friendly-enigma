@@ -5,11 +5,12 @@ from pandas import DataFrame, Series
 from torch.utils.data import Dataset
 from typing import Tuple
 
+from data.normalized_labels import Labels
 
 class HELOCDataset(Dataset):
     def __init__(self, predictors: DataFrame):
         predictors, target = self.split_predictor(predictors)
-        self.predictors = torch.tensor(predictors.values, dtype=torch.float)
+        self.predictors = torch.tensor(Labels(predictors.values).labels, dtype=torch.float)
         self.targets = target
 
     def __len__(self):
