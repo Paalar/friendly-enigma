@@ -31,7 +31,14 @@ class MultiTaskLearner(GenericLearner):
         self.learning_rate = config["mtl_learning_rate"]
         # Heads
         self.prediction_head = nn.Linear(input_length, output_length[0])
-        self.explanation_head = nn.Linear(input_length, output_length[1])
+        self.explanation_head = nn.Sequential(
+            nn.Linear(input_length, 250),
+            nn.ReLU(),
+            nn.Linear(250, 125),
+            nn.ReLU(),
+            nn.Linear(125, output_length[1]),
+            nn.ReLU()
+        )
         # Loss functions per head
         self.loss_functions = [F.binary_cross_entropy, nll]
         self.prediction_head.register_forward_hook(self.forward_hook)
@@ -137,7 +144,7 @@ class MultiTaskLearner(GenericLearner):
     def converge_weights(self, explanation):
         highest_indices = torch.argmax(explanation, dim=1)
         counting_weights = torch.stack(
-            [self.explanation_head.weight[index] for index in highest_indices]
+            [self.explanation_head.weight[index] for index in highest_indices] # Does not work with weights
         )
         return self.get_explanation_prefix_difference(
             self.prediction_head.weight, counting_weights
