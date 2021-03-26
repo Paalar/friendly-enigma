@@ -1,0 +1,11 @@
+version: "2.1"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: /bin/bash
+    volumes:
+      - .:/app
+    stdin_open: true # docker run -i
+    tty: true # docker run -t
