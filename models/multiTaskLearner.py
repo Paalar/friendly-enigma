@@ -79,10 +79,11 @@ class MultiTaskLearner(GenericLearner):
         alignment_weight = (
             0.8  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
         )
-        return (
-            pred_weight * (loss_prediction + loss_explanation)
-            + alignment_weight * loss_convergence
-        )
+        return self.total_loss(loss_prediction=loss_prediction, loss_explanation=loss_explanation)
+        # return (
+        #     pred_weight * (loss_prediction + loss_explanation)
+        #     + alignment_weight * loss_convergence
+        # )
 
 
     def validation_step(self, batch, _):
@@ -94,8 +95,8 @@ class MultiTaskLearner(GenericLearner):
         ) = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
-        self.log("loss_validate", loss_prediction + loss_explanation)
-        # return loss_prediction + loss_explanation
+        loss = self.total_loss(loss_prediction=loss_prediction, loss_explanation=loss_explanation)
+        self.log("loss_validate", loss, prog_bar=True)
 
     def test_step(self, batch, _):
         (
@@ -113,10 +114,10 @@ class MultiTaskLearner(GenericLearner):
     def configure_optimizers(self):
         return optim.Adadelta(self.parameters(), lr=self.learning_rate)
 
-    def calculate_loss(self, prediction, correct_label, head=0, T=0):
+    def calculate_loss(self, prediction, correct_label, head=0):
         loss_function = self.loss_functions[head]
         loss = loss_function(prediction, correct_label)
-        return loss  # + self.log_vars[head] + T
+        return loss
 
     def converge_gradients(self, prediction, explanation):
         (layer_pred,) = autograd.grad(
@@ -160,3 +161,9 @@ class MultiTaskLearner(GenericLearner):
         )
         """
         return explanation_prefix_convergence_distance
+
+    def total_loss(self, loss_prediction, loss_explanation):
+        return loss_explanation
+        # return (
+        #     loss_prediction + loss_explanation
+        # ) / 2
