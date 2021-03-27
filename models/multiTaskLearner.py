@@ -47,6 +47,7 @@ class MultiTaskLearner(GenericLearner):
             nn.Linear(125, output_length[1]),
             nn.ReLU()
         )
+        self.dropout = nn.Dropout(p=0.2)
         # Loss functions per head
         self.loss_functions = [F.binary_cross_entropy, nll]
         self.prediction_head.register_forward_hook(self.forward_hook)
@@ -57,6 +58,7 @@ class MultiTaskLearner(GenericLearner):
         prediction = self.prediction_head(rest_output)
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
+        explanation = self.dropout(explanation)
         explanation = F.log_softmax(explanation, dim=-1)
         return prediction, explanation
 
