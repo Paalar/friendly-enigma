@@ -1,7 +1,8 @@
 import pandas as pd
-import inspect
+import math
 
 from pytorch_lightning import LightningDataModule
+from torch.utils import data
 from .helocDataset import HELOCDataset
 from torch.utils.data import DataLoader
 from config import config
@@ -10,12 +11,13 @@ from config import config
 class HelocDataModule(LightningDataModule):
     def __init__(
         self,
-        validation_size: int = 2,
         workers: int = 8,
         batch_size: int = 70,
     ):
         super().__init__()
-        self.validation_size = validation_size
+        self.training_size = config["training_size_percentage"] / 100
+        self.test_size = config["test_size_percentage"] / 100
+        self.validation_size = 1 - self.training_size - self.test_size
         self.workers = (
             config["cpu_workers"] if type(config["cpu_workers"]) is int else workers
         )
@@ -36,14 +38,11 @@ class HelocDataModule(LightningDataModule):
         # Read and split data
         dataset = self.data
         dataset_length = len(dataset.values)
-        self.training_split = dataset[: dataset_length // self.validation_size]
-        confirmation_split = dataset[dataset_length // self.validation_size :]
-        self.test_split = confirmation_split[
-            len(confirmation_split) // self.validation_size :
-        ]
-        self.validate_split = confirmation_split[
-            : len(confirmation_split) // self.validation_size
-        ]
+        training_split_length = math.floor(dataset_length * self.training_size)
+        test_split_length = training_split_length + math.floor(dataset_length * self.test_size)
+        self.training_split = dataset[:training_split_length]
+        self.test_split = dataset[training_split_length:test_split_length]
+        self.validate_split = dataset[test_split_length:]
 
     def train_dataloader(self):
         HELOC_train = HELOCDataset(self.training_split)
