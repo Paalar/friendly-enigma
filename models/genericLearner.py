@@ -70,6 +70,7 @@ class GenericLearner(pl.LightningModule, ABC):
     def metrics_update(self, label, prediction, target, head=0):
         metric = self.metrics[head]
         if head == 1:
+            prediction = torch.exp(prediction)
             self.log(
                 f"Accuracy/head-{head}/{label}",
                 metric[0](prediction, torch.max(target, 1)[1]),

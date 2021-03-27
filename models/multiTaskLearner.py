@@ -1,6 +1,5 @@
 import torch.nn.functional as F
 import torch
-from torch.utils import data
 
 from config import config
 from torch import nn, optim, autograd
@@ -10,13 +9,22 @@ from models.genericLearner import GenericLearner
 from utils.custom_torch import zeros, ones
 
 
-def categorical_cross_entropy(explanation, true_explanation):
-    return F.cross_entropy(explanation, torch.max(true_explanation, 1)[1])
+w = torch.tensor([0.,0.,7.,0.,7.,2.,2.,6.,6.,2.,3.,7.,4.,7.,6.,4.,4.,7.,7.,5.,4.,3.,7.])
+NNLLL = nn.NLLLoss(weight=w)
+
+def cross_entropy_with_logits(explanation, true_explanation):
+    return F.cross_entropy(explanation, get_multiclass_target(true_explanation))
 
 
 def nll(explanation, true_explanation):
-    w = torch.tensor([0.,0.,7.,0.,7.,2.,2.,6.,6.,2.,3.,7.,4.,7.,6.,4.,4.,7.,7.,5.,4.,3.,7.])
-    return nn.NLLLoss(weight=w)(explanation, torch.max(true_explanation, 1)[1])
+    nll = NNLLL(explanation, get_multiclass_target(true_explanation))
+    return nll
+
+def kld_loss(explanation, true_explanation):
+    return nn.KLDivLoss()(explanation, get_multiclass_target(true_explanation))
+
+def get_multiclass_target(target):
+    return torch.max(target, 1)[1]
 
 
 class MultiTaskLearner(GenericLearner):
@@ -49,7 +57,7 @@ class MultiTaskLearner(GenericLearner):
         prediction = self.prediction_head(rest_output)
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
-        explanation = F.softmax(explanation, dim=-1)
+        explanation = F.log_softmax(explanation, dim=-1)
         return prediction, explanation
 
     def predict_batch(self, batch):
