@@ -2,13 +2,13 @@ from data.helocDataset import HELOCDataset
 from data.normalized_labels import Labels
 import torch
 import numpy as np
-
 class CchvaeDataset(HELOCDataset):
     def __init__(self, dataset):
         dataset, explanations = self.split_explanation_label(dataset)
         self.prediction_data = Labels(dataset.iloc[:,1:].to_numpy())
-        self.explanation_labels = Labels(np.asfarray(explanations))
-        self.explanation_labels.original_labels = torch.abs(torch.from_numpy(self.explanation_labels.original_labels))
+        abs_explanation = torch.abs(torch.tensor(explanations)).numpy()
+        self.explanation_labels = Labels(abs_explanation)
+        self.explanation_labels.original_labels = torch.from_numpy(self.explanation_labels.original_labels)
         self.explanations = explanations
         super().__init__(dataset)
 
