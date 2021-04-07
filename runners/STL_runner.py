@@ -49,17 +49,23 @@ class STLRunner:
             self.args,
             max_epochs=self.max_epochs,
             logger=self.logger,
-            checkpoint_callback=create_checkpoint_callback(self.checkpoints_prefix),
+            callbacks=[*create_checkpoint_callbacks(self.checkpoints_prefix)],
         )
         trainer.fit(self.model, self.data_module)
         trainer.test(self.model, datamodule=self.data_module)
         # dashboard.create_confusion_matrix(self.model, self.logger, self.data_module)
 
 
-def create_checkpoint_callback(prefix):
-    return ModelCheckpoint(
+def create_checkpoint_callbacks(prefix):
+    period_callback = ModelCheckpoint(
+        period=(config['stl_epochs'] if prefix == "stl" else config["mtl_epochs"])/10,
+        dirpath=f"./checkpoints/{prefix}-{datetime.now().strftime('%y-%m-%d-%H-%M-%S')}",
+        filename="heloc-{epoch:02d}-{loss_validate:.2f}",
+    )
+    loss_validate_callback = ModelCheckpoint(
         monitor="loss_validate",
         save_top_k=3,
         dirpath=f"./checkpoints/{prefix}-{datetime.now().strftime('%y-%m-%d-%H-%M-%S')}",
         filename="heloc-{epoch:02d}-{loss_validate:.2f}",
     )
+    return period_callback, loss_validate_callback
