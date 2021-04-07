@@ -60,12 +60,12 @@ def create_checkpoint_callbacks(prefix):
     period_callback = ModelCheckpoint(
         period=(config['stl_epochs'] if prefix == "stl" else config["mtl_epochs"])/10,
         dirpath=f"./checkpoints/{prefix}-{datetime.now().strftime('%y-%m-%d-%H-%M-%S')}",
-        filename="heloc-{epoch:02d}-{loss_validate:.2f}",
+        filename="heloc-{epoch:02d}-{loss_validate:.2f}-period",
     )
     loss_validate_callback = ModelCheckpoint(
         monitor="loss_validate",
         save_top_k=3,
         dirpath=f"./checkpoints/{prefix}-{datetime.now().strftime('%y-%m-%d-%H-%M-%S')}",
-        filename="heloc-{epoch:02d}-{loss_validate:.2f}",
+        filename="heloc-{epoch:02d}-{loss_validate:.2f}-top",
     )
     return period_callback, loss_validate_callback
