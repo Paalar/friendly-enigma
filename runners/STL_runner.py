@@ -66,6 +66,13 @@ def create_checkpoint_callbacks(prefix):
         monitor="loss_validate",
         save_top_k=3,
         dirpath=f"./checkpoints/{prefix}-{datetime.now().strftime('%y-%m-%d-%H-%M-%S')}",
-        filename="heloc-{epoch:02d}-{loss_validate:.2f}-top",
+        filename="heloc-{epoch:02d}-{loss_validate:.2f}-top-validate",
     )
-    return period_callback, loss_validate_callback
+    accuracy_epoch_callback = ModelCheckpoint(
+        monitor="Accuracy/head-1/train-step",
+        save_top_k=3,
+        mode="max",
+        dirpath=f"./checkpoints/{prefix}-{datetime.now().strftime('%y-%m-%d-%H-%M-%S')}",
+        filename="heloc-{epoch:02d}-{Accuracy/head-1/train-step:.2f}-top-accuarcy-expl",
+    )
+    return period_callback, loss_validate_callback, accuracy_epoch_callback
