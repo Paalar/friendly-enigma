@@ -60,7 +60,6 @@ class MultiTaskLearner(GenericLearner):
         prediction = self.prediction_head(rest_output)
         prediction = torch.sigmoid(prediction)
         explanation = self.explanation_head(rest_output)
-        explanation = self.dropout(explanation)
         explanation = F.log_softmax(explanation, dim=-1)
         return prediction, explanation
 
@@ -98,11 +97,7 @@ class MultiTaskLearner(GenericLearner):
         alignment_weight = (
             0.8  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
         )
-        return self.total_loss(loss_prediction=loss_prediction, loss_explanation=loss_explanation)
-        # return (
-        #     pred_weight * (loss_prediction + loss_explanation)
-        #     + alignment_weight * loss_convergence
-        # )
+        return self.total_loss(loss_prediction=loss_prediction * 0.3, loss_explanation=loss_explanation * 0.7)
 
 
     def validation_step(self, batch, _):
@@ -131,7 +126,7 @@ class MultiTaskLearner(GenericLearner):
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
-        return optim.Adadelta(self.parameters(), lr=self.learning_rate)
+        return optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def calculate_loss(self, prediction, correct_label, head=0):
         loss_function = self.loss_functions[head]
@@ -182,7 +177,6 @@ class MultiTaskLearner(GenericLearner):
         return explanation_prefix_convergence_distance
 
     def total_loss(self, loss_prediction, loss_explanation):
-        return loss_explanation
-        # return (
-        #     loss_prediction + loss_explanation
-        # ) / 2
+        return (
+            loss_prediction + loss_explanation
+        ) / 2
