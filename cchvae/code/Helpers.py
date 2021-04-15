@@ -18,7 +18,6 @@ import argparse
 
 
 
-
 # Argument Parser
 def getArgs(argv=None):
     parser = argparse.ArgumentParser(description='Default parameters of the models', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -30,8 +29,8 @@ def getArgs(argv=None):
     parser.add_argument('--dim_latent_z', type=int, default=2, help='Dimension of the Z latent space')
     parser.add_argument('--dim_latent_y', type=int, default=5, help='Dimension of the Y latent space')
     parser.add_argument('--dim_latent_y_partition', type=int, nargs='+', help='Partition of the Y latent space')
-    parser.add_argument('--types_file', type=str, default='cchvae/data/heloc/heloc_types.csv', help='File with the types of the data')
-    parser.add_argument('--types_file_c', type=str, default='cchvae/data/heloc/heloc_types_c.csv', help='File with the types of the conditioning data')
+    parser.add_argument('--types_file', type=str, default='cchvae/data/gmsc/2_10/gmsc_types.csv', help='File with the types of the data')
+    parser.add_argument('--types_file_c', type=str, default='cchvae/data/gmsc/2_10/gmsc_types_c.csv', help='File with the types of the conditioning data')
     parser.add_argument('--norm_latent_space', type=int, default=2, help='To measure distance between latent variables')
     parser.add_argument('--step_size', type=float, default=0.5, help='Step size for Random Search')
     parser.add_argument('--search_samples', type=int, default=1000, help='Number search samples for counterfactual search')

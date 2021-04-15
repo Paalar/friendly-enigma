@@ -7,9 +7,12 @@ def get_file(filename):
     dataDir = Path(__file__).parent.absolute()
     return Path(f"{dataDir}/{filename}").resolve()
 
-columns = pd.read_csv(get_file("./heloc_dataset_v1_pruned.csv")).columns
-counterfactuals = pd.read_csv(get_file("./counterfactuals.csv"), header=None)
-delta_counterfactuals = pd.read_csv(get_file("./delta_counterfactuals.csv"), header=None)
+columns = pd.read_csv(get_file("./gmsc/gmsc-training.csv")).columns
+counterfactuals = pd.read_csv(get_file("./gmsc/gmsc_counterfactuals.csv"), header=None)
+delta_counterfactuals = pd.read_csv(get_file("./gmsc/gmsc_delta_counterfactuals.csv"), header=None)
+# columns = pd.read_csv(get_file("./heloc_dataset_v1_pruned.csv")).columns
+# counterfactuals = pd.read_csv(get_file("./counterfactuals.csv"), header=None)
+# delta_counterfactuals = pd.read_csv(get_file("./delta_counterfactuals.csv"), header=None)
 augmented_counterfactuals = []
 augmented_delta_counterfactuals = []
 progressbar_length = len(delta_counterfactuals.values)
@@ -41,4 +44,4 @@ with tqdm(total=progressbar_length) as progressbar:
 df_c = pd.DataFrame(data=augmented_counterfactuals, columns=columns)
 df_dc = pd.DataFrame(data=augmented_delta_counterfactuals, columns=columns)
 df_c.to_csv("augmented_counterfactuals.csv", index=False)
-df_dc.to_csv("augmentted_delta_counterfactuals.csv", index=False, header=None)
+df_dc.to_csv("augmented_delta_counterfactuals.csv", index=False, header=None)

@@ -9,8 +9,9 @@ from models.genericLearner import GenericLearner
 from utils.custom_torch import zeros, ones
 
 
-w = torch.tensor([0.,0.,7.,0.,7.,2.,2.,6.,6.,2.,3.,7.,4.,7.,6.,4.,4.,7.,7.,5.,4.,3.,7.])
-NNLLL = nn.NLLLoss(weight=w)
+# w = torch.tensor([0.,0.,7.,0.,7.,2.,2.,6.,6.,2.,3.,7.,4.,7.,6.,4.,4.,7.,7.,5.,4.,3.,7.])
+# NNLLL = nn.NLLLoss(weight=w)
+NNLLL = nn.NLLLoss()
 
 def cross_entropy_with_logits(explanation, true_explanation):
     return F.cross_entropy(explanation, get_multiclass_target(true_explanation))
@@ -31,8 +32,9 @@ class MultiTaskLearner(GenericLearner):
     def __init__(
         self, model_core: Net, input_length: int, output_length: Tuple[int, int]
     ):
+        print(output_length)
         super(MultiTaskLearner, self).__init__(
-            num_classes=[1, 23], model_core=model_core
+            num_classes=output_length, model_core=model_core
         )
         self.save_hyperparameters()
         # Hyperparameters
