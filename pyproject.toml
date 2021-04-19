@@ -19,6 +19,7 @@ matplotlib = "^3.3.4"
 tensorflow-probability = "^0.12.1"
 torchmetrics = "^0.2.0"
 sklearn = "^0.0"
+captum = "^0.3.1"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
