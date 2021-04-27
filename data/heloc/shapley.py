@@ -34,21 +34,12 @@ heloc_shapley_values = []
 labels = Labels(heloc.to_numpy())
 targets, predictors = split_normalized(labels.labels)
 with tqdm(total=len(targets)) as progress_bar:
-    for target, predictor in zip(targets, predictors.values):
-        try:
-            target = int(target)
-            inp = torch.tensor(predictor, dtype=torch.float32).unsqueeze(0)
-            attributions = sv.attribute(inp, target=target)
-            heloc_shapley_values.append(attributions)
-        except:
-            print("target", target)
-            print("features", predictor)
-            print("input", inp)
-            print("feil")
-        finally:
-            progress_bar.update(1)
-    
-        
+    for predictor in predictors.values:
+        inp = torch.tensor(predictor, dtype=torch.float32).unsqueeze(0)
+        attributions = sv.attribute(inp, target=0)
+        heloc_shapley_values.append(attributions)
+        progress_bar.update(1)
+
 
 df = DataFrame(heloc_shapley_values, index=None)
 df.to_csv("data/heloc/shapley_heloc_pruned.csv")

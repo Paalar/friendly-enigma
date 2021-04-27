@@ -2,13 +2,12 @@ import pandas as pd
 import math
 
 from pytorch_lightning import LightningDataModule
-from torch.utils import data
-from .helocDataset import HELOCDataset
+from .stlGmscDataset import STLGMSCDataset
 from torch.utils.data import DataLoader
 from config import config
 
 
-class HelocDataModule(LightningDataModule):
+class STLGMSCDataModule(LightningDataModule):
     def __init__(
         self,
         workers: int = 8,
@@ -24,11 +23,16 @@ class HelocDataModule(LightningDataModule):
         self.batch_size = (
             config["batch_size"] if type(config["batch_size"]) is int else batch_size
         )
+        self.workers = (
+            config["cpu_workers"] if type(config["cpu_workers"]) is int else workers
+        )
+        self.batch_size = (
+            config["batch_size"] if type(config["batch_size"]) is int else batch_size
+        )
 
     def prepare_data(self):
-        # CSV_FILE = "data/counterfactualsT.csv"
-        CSV_FILE = "data/heloc/augmented_counterfactuals_11_12.csv"
-        # CSV_FILE = "data/heloc/heloc_dataset_v1_pruned.csv"
+        CSV_FILE = "data/gmsc/gmsc-training.csv"
+        # CSV_FILE = "data/gmsc/augmented_counterfactuals.csv"
         self.data = pd.read_csv(CSV_FILE)
         self.row_length = self.data.shape[1] - 1  # Remove predictor
         self.labels = self.data.columns[1:]
@@ -45,22 +49,22 @@ class HelocDataModule(LightningDataModule):
         self.validate_split = dataset[test_split_length:]
 
     def train_dataloader(self):
-        HELOC_train = HELOCDataset(self.training_split)
+        GMSC_train = STLGMSCDataset(self.training_split)
         return DataLoader(
-            HELOC_train,
+            GMSC_train,
             num_workers=self.workers,
             batch_size=self.batch_size,
             shuffle=True,
         )
 
     def val_dataloader(self):
-        HELOC_validate = HELOCDataset(self.validate_split)
+        GMSC_validate = STLGMSCDataset(self.validate_split)
         return DataLoader(
-            HELOC_validate, num_workers=self.workers, batch_size=self.batch_size
+            GMSC_validate, num_workers=self.workers, batch_size=self.batch_size
         )
 
     def test_dataloader(self):
-        HELOC_test = HELOCDataset(self.test_split)
+        GMSC_test = STLGMSCDataset(self.test_split)
         return DataLoader(
-            HELOC_test, num_workers=self.workers, batch_size=self.batch_size
+            GMSC_test, num_workers=self.workers, batch_size=self.batch_size
         )

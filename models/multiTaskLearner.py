@@ -41,15 +41,7 @@ class MultiTaskLearner(GenericLearner):
         self.learning_rate = config["mtl_learning_rate"]
         # Heads
         self.prediction_head = nn.Linear(input_length, output_length[0])
-        self.explanation_head = nn.Sequential(
-            nn.Linear(input_length, 250),
-            nn.ReLU(),
-            nn.Linear(250, 125),
-            nn.ReLU(),
-            nn.Linear(125, output_length[1]),
-            nn.ReLU()
-        )
-        self.dropout = nn.Dropout(p=0.2)
+        self.explanation_head = nn.Linear(input_length, output_length[1])
         # Loss functions per head
         self.loss_functions = [F.binary_cross_entropy, nll]
         self.prediction_head.register_forward_hook(self.forward_hook)
@@ -91,13 +83,7 @@ class MultiTaskLearner(GenericLearner):
         # self.log("Loss/train-head-difference", loss_convergence)
         self.metrics_update("train-step", prediction, prediction_label)
         self.metrics_update("train-step", explanation, explanation_label, head=1)
-        pred_weight = (
-            0.2  # 0.2 if self.current_epoch > 100 else 50 / (self.current_epoch + 1)
-        )
-        alignment_weight = (
-            0.8  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
-        )
-        return self.total_loss(loss_prediction=loss_prediction * 0.3, loss_explanation=loss_explanation * 0.7)
+        return self.total_loss(loss_prediction=loss_prediction, loss_explanation=loss_explanation, convergence=loss_convergence)
 
 
     def validation_step(self, batch, _):
@@ -109,7 +95,12 @@ class MultiTaskLearner(GenericLearner):
         ) = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         loss_explanation = self.calculate_loss(explanation, explanation_label, head=1)
-        loss = self.total_loss(loss_prediction=loss_prediction, loss_explanation=loss_explanation)
+        loss_convergence = (
+            self.converge_gradients(prediction, explanation)
+            if config["loss_converge_method"] == "gradients"
+            else self.converge_weights(explanation)
+        )
+        loss = self.total_loss(loss_prediction=loss_prediction, loss_explanation=loss_explanation, convergence=loss_convergence)
         self.log("loss_validate", loss, prog_bar=True)
 
     def test_step(self, batch, _):
@@ -176,7 +167,11 @@ class MultiTaskLearner(GenericLearner):
         """
         return explanation_prefix_convergence_distance
 
-    def total_loss(self, loss_prediction, loss_explanation):
-        return (
-            loss_prediction + loss_explanation
-        ) / 2
+    def total_loss(self, loss_prediction, loss_explanation, convergence):
+        pred_weight = (
+            0.5  # 0.2 if self.current_epoch > 100 else 50 / (self.current_epoch + 1)
+        )
+        alignment_weight = (
+            0.5  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
+        )
+        return (((loss_prediction + loss_explanation) / 2 ) * pred_weight + convergence * alignment_weight) / 2

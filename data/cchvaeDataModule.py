@@ -12,7 +12,7 @@ class CchvaeDataModule(HelocDataModule):
 
     def prepare_data(self):
         super().prepare_data()
-        DELTA_COUNTERFACTUALS_CSV_FILE = "data/augmented_delta_counterfactuals.csv"
+        DELTA_COUNTERFACTUALS_CSV_FILE = "data/heloc/augmented_delta_counterfactuals_11_12.csv"
         counterfactuals_data = pd.read_csv(DELTA_COUNTERFACTUALS_CSV_FILE, header=None)
         squashed_counterfactuals = [
             "".join(str(row)) for row in counterfactuals_data.values[:, 1:]

@@ -9,6 +9,7 @@ from runners.STL_runner import STLRunner
 from runners.MTL_runner import MTLRunner
 from runners.Counterfactual_runner import Counterfactual_Runner
 from runners.GMSC_runner import GMSC_Runner
+from runners.STL_GMSC_runner import STL_GMSC_Runner
 from config import config
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
@@ -20,6 +21,7 @@ runners = {
     "mtl": MTLRunner,
     "cchvae": Counterfactual_Runner,
     "gmsc": GMSC_Runner,
+    "stl_gmsc": STL_GMSC_Runner,
 }
 
 parser = ArgumentParser(description="A multitask learner")

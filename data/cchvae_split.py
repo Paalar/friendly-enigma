@@ -9,13 +9,13 @@ cchvaeFolder = Path(cchvaePath)
 cchvaeFolder.mkdir(exist_ok=True)
 
 dataDir = Path(__file__).parent.absolute()
-heloc = Path(f"{dataDir}/heloc_dataset_v1_pruned.csv").resolve()
+heloc = Path(f"{dataDir}/heloc/heloc_dataset_v1_pruned.csv").resolve()
 df = pd.read_csv(heloc)
 records = df.to_numpy()
 
 types_column_names = ["type", "dim", "nclass"]
 
-locked_features = config["cchvae_locked_features"]
+locked_features = config["cchvae_locked_features_heloc"]
 free_features = [i for i in range(1, 24) if (i not in locked_features)]
 
 heloc_x_c = {index: records[:, value] for index, value in enumerate(locked_features)}

@@ -20,6 +20,7 @@ tensorflow-probability = "^0.12.1"
 torchmetrics = "^0.2.0"
 sklearn = "^0.0"
 captum = "^0.3.1"
+comet-ml = "^3.9.0"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
