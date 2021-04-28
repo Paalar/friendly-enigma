@@ -12,16 +12,42 @@ class GenericLearner(pl.LightningModule, ABC):
     def __init__(self, model_core: Net, num_classes: int = [1]):
         super(GenericLearner, self).__init__()
         self.rest_of_model = model_core
-        metrics = [
-            tm.Accuracy,
-            tm.Precision,
-            tm.Recall,
+        metrics = [tm.Accuracy, tm.Precision, tm.Recall]
+        self.metrics = [
+            [metric().to(get_device()) for metric in metrics]
+            for head in range(len(num_classes))
         ]
-        self.metrics = [[metric().to(get_device()) for metric in metrics] for head in range(len(num_classes))]
         self.heads = len(num_classes)
         for index, head in enumerate(num_classes):
-            self.metrics[index].append(pl.metrics.FBeta(num_classes=head).to(get_device()))
+            self.metrics[index].append(
+                pl.metrics.FBeta(num_classes=head).to(get_device())
+            )
+            # self.metrics[index].append(tm.AUROC(num_classes=head))
             # self.metrics[index].append(pl.metrics.ConfusionMatrix(num_classes=2 if head == 1 else head))
+        self.metrics = {
+            "test": self.instantiate_metrics("test", num_classes),
+            "train": self.instantiate_metrics("train", num_classes),
+        }
+        self.train_head2_AUROC = tm.AUROC(num_classes=10)
+
+    def instantiate_metrics(self, label, num_classes):
+        heads = len(num_classes)
+        metrics = [tm.Accuracy, tm.Precision, tm.Recall]
+        metrics_per_head = [{} for head in range(heads)]
+        for index, head in enumerate(metrics_per_head):
+            for metric in metrics:
+                head.update({f"{metric.__name__}/head-{index}/{label}": metric()})
+                head[f"FBeta/head-{index}/{label}"] = tm.FBeta(
+                    num_classes=num_classes[index]
+                )
+                if index == 0:
+                    head[f"AUROC/head-{index}/{label}"] = tm.AUROC()
+        metrics_as_MetricCollection = [
+            tm.MetricCollection(head) for head in metrics_per_head
+        ]
+        for collection in metrics_as_MetricCollection:
+            collection.persistent()
+        return metrics_as_MetricCollection
 
     @abstractmethod
     def forward(self, data_input):
@@ -52,42 +78,29 @@ class GenericLearner(pl.LightningModule, ABC):
         raise NotImplementedError
 
     def test_epoch_end(self, outs):
+        pass
         for head in range(self.heads):
-            self.metrics_compute("test-epoch", head=head)
+            self.metrics_compute("test", head=head)
 
     def training_epoch_end(self, outs):
+        pass
         for head in range(self.heads):
-            self.metrics_compute("train-epoch", head=head)
+            self.metrics_compute("train", head=head)
 
     def metrics_compute(self, label, head):
-        metric = self.metrics[head]
-        self.log(f"Accuracy/head-{head}/{label}", metric[0].compute())
-        self.log(f"Precision/head-{head}/{label}", metric[1].compute())
-        self.log(f"Recall/head-{head}/{label}", metric[2].compute())
-        self.log(f"Fbeta/head-{head}/{label}", metric[3].compute())
-        # metric[4].compute()
+        metric = self.metrics[label][head]
+        self.log_dict(metric.compute())
 
     def metrics_update(self, label, prediction, target, head=0):
-        metric = self.metrics[head]
+        metric = self.metrics[label][head]
         if head == 1:
-            prediction = torch.exp(prediction)
-            self.log(
-                f"Accuracy/head-{head}/{label}",
-                metric[0](prediction, torch.max(target, 1)[1]),
-            )
-            self.log(f"Precision/head-{head}/{label}", metric[1](prediction, torch.max(target, 1)[1]))
-            self.log(f"Recall/head-{head}/{label}", metric[2](prediction, torch.max(target, 1)[1]))
-            self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, torch.max(target, 1)[1]))
+            prediction = torch.exp(prediction).detach()
+            target = torch.max(target.detach(), 1)[1]
+            metric.update(prediction, target)
         else:
-            target = target.to(torch.int)
-            self.log(
-                f"Accuracy/head-{head}/{label}", metric[0](prediction, target)
-            )
-            self.log(f"Precision/head-{head}/{label}", metric[1](prediction, target))
-            self.log(f"Recall/head-{head}/{label}", metric[2](prediction, target))
-            self.log(f"Fbeta/head-{head}/{label}", metric[3](prediction, target))
-        # metric[4].update(prediction, correct_label)
-        # metric[4](prediction, correct_label)
+            target = target.to(torch.int).detach()
+            prediction = prediction.detach()
+            metric.update(prediction, target)
 
     def print_gradients(self):
         for name, parameter in self.named_parameters():
@@ -95,9 +108,11 @@ class GenericLearner(pl.LightningModule, ABC):
             if gradient == None:
                 print(f"Parameter {name} is none")
                 continue
-            pred = torch.where(gradient == 0, 0,1)
+            pred = torch.where(gradient == 0, 0, 1)
             if torch.sum(pred) == 0:
-                print(f"Index {self.current_epoch} - Parameter {name}'s gradients are summed to 0.")
+                print(
+                    f"Index {self.current_epoch} - Parameter {name}'s gradients are summed to 0."
+                )
 
     # def on_before_zero_grad(self, optimizer) -> None:
     #     self.print_gradients()

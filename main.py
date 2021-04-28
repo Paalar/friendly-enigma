@@ -35,7 +35,7 @@ def seed_random(seed):
 
 
 def main():
-    seed_random(69420)
+    #seed_random(69420)
     args = parser.parse_args()
     config["device"] = 'cuda:0' if type(args.gpus) is int else 'cpu'
     config["cpu_workers"] = config["cpu_workers"] if config["device"] == 'cpu' else 0
