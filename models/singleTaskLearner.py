@@ -39,7 +39,7 @@ class SingleTaskLearner(GenericLearner):
         prediction, prediction_label = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
         self.log("Loss/train-prediction", loss_prediction)
-        self.metrics_update("train-step", prediction, prediction_label)
+        self.metrics_update("train", prediction, prediction_label)
         return loss_prediction
 
     def validation_step(self, batch, _):
@@ -51,7 +51,7 @@ class SingleTaskLearner(GenericLearner):
     def test_step(self, batch, _):
         prediction, prediction_label = self.predict_batch(batch)
         loss_prediction = self.calculate_loss(prediction, prediction_label)
-        self.metrics_update("test-step", prediction, prediction_label)
+        self.metrics_update("test", prediction, prediction_label)
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
@@ -59,5 +59,4 @@ class SingleTaskLearner(GenericLearner):
 
     def calculate_loss(self, prediction, correct_label):
         loss = self.loss_function(prediction, correct_label)
-        precision = torch.exp(-self.log_vars)
-        return precision * loss + self.log_vars
+        return loss

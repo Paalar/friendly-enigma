@@ -10,24 +10,25 @@ np.random.seed(123)
 os.environ["PYTHONHASHSEED"] = str(123)
 torch.manual_seed(123)
 
+VAL = 100
 
 def get_sum_with_max_contribution_per_value(tensor: torch.Tensor):
     values = tensor.tolist()
     target_val = 0
     for value in values:
-        positive_capped = value if value < 0.5 else 0.5
-        negative_capped = positive_capped if positive_capped > -0.5 else -0.5
+        positive_capped = value if value < (0.5 * VAL) else (0.5 * VAL)
+        negative_capped = positive_capped if positive_capped > (-0.5 * VAL) else (-0.5 * VAL)
         target_val += negative_capped
     return target_val
 
 
-initial_random_data = torch.rand(50000, 4)
-initial_sum_to_1 = initial_random_data - 0.5
+initial_random_data = torch.rand(50000, 4) * VAL
+initial_sum_to_1 = initial_random_data - (0.5 * VAL)
 
 # A positive target is one where the sum is over 0.5, and a single value cannot contribute more than 0.5 towards the sum.
 targets = torch.tensor(
     [
-        1 if get_sum_with_max_contribution_per_value(tensor) > 0.5 else 0
+        1 if get_sum_with_max_contribution_per_value(tensor) > (0.5 * VAL) else 0
         for tensor in initial_sum_to_1
     ]
 )

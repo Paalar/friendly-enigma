@@ -72,7 +72,6 @@ class MultiTaskLearner(GenericLearner):
             explanation,
             explanation_label,
         ) = self.predict_batch(batch)
-
         loss_convergence = (
             self.converge_gradients(prediction, explanation)
             if config["loss_converge_method"] == "gradients"
