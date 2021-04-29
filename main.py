@@ -25,12 +25,14 @@ runners = {
     "gmsc": GMSC_Runner,
     "stl_gmsc": STL_GMSC_Runner,
     "stl_fake": STL_Fake_Runner,
-    "fake": MTL_Fake_Runner
+    "fake": MTL_Fake_Runner,
 }
 
 parser = ArgumentParser(description="A multitask learner")
-parser.add_argument("model_type", choices=runners.keys(), help="")
+parser.add_argument("model_type", choices=runners.keys(), help="Type of model")
+parser.add_argument("--tag", type=str, help="Tag for model")
 parser = pl.Trainer.add_argparse_args(parser)
+
 
 def seed_random(seed):
     np.random.seed(seed)
@@ -39,10 +41,10 @@ def seed_random(seed):
 
 
 def main():
-    #seed_random(69420)
+    # seed_random(69420)
     args = parser.parse_args()
-    config["device"] = 'cuda:0' if type(args.gpus) is int else 'cpu'
-    config["cpu_workers"] = config["cpu_workers"] if config["device"] == 'cpu' else 0
+    config["device"] = "cuda:0" if type(args.gpus) is int else "cpu"
+    config["cpu_workers"] = config["cpu_workers"] if config["device"] == "cpu" else 0
     learner = runners.get(args.model_type)(args=args)
     learner.run()
 

@@ -27,9 +27,11 @@ class STLRunner:
     ):
         self.max_epochs = max_epochs
         self.nodes_before_split = nodes_before_split
-        self.logger = dashboard.create_logger()
         self.data_module = data_module
         self.data_module.prepare_data()
+        self.logger = dashboard.create_logger(
+            cli_args=args, data_module=data_module, runner_type=checkpoints_prefix
+        )
         self.checkpoints_prefix = checkpoints_prefix
         self.args = args
         input_length = self.data_module.row_length
@@ -58,10 +60,10 @@ class STLRunner:
 
 def create_checkpoint_callbacks(prefix):
     period_callback = ModelCheckpoint(
-        period=(config['stl_epochs'] if prefix == "stl" else config["mtl_epochs"])/10,
+        period=(config["stl_epochs"] if prefix == "stl" else config["mtl_epochs"]) / 10,
         dirpath=f"./checkpoints/{prefix}-{datetime.now().strftime('%y-%m-%d-%H-%M-%S')}",
         filename="heloc-{epoch:02d}-{loss_validate:.2f}-recent",
-        save_last=True
+        save_last=True,
     )
     loss_validate_callback = ModelCheckpoint(
         monitor="loss_validate",
