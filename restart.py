@@ -1,3 +1,4 @@
+import comet_ml
 import os
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
@@ -8,7 +9,26 @@ from datetime import datetime
 from config import config
 from utils import dashboard
 from models.multiTaskLearner import MultiTaskLearner
+from argparse import ArgumentParser
+
 from data.gmscDataModule import GMSCDataModule
+from data.stlGmscDataModule import STLGMSCDataModule
+from data.stlFakeDataModule import STLFakeDataModule
+from data.mtlFakeDataModule import MTLFakeDataModule
+
+models = {
+    # "stl": STLRunner,
+    # "mtl": MTLRunner,
+    # "cchvae": Counterfactual_Runner,
+    "gmsc": GMSCDataModule,
+    "stl_gmsc": STLGMSCDataModule,
+    "stl_fake": STLFakeDataModule,
+    "fake": MTLFakeDataModule
+}
+
+parser = ArgumentParser(description="A multitask learner-restarter")
+parser.add_argument("model_type", choices=models.keys(), help="")
+args = parser.parse_args()
 
 def recursivelySelectFile(file_or_folder="checkpoints"):
     if os.path.isfile(file_or_folder):
@@ -39,7 +59,7 @@ def create_checkpoint_callbacks(prefix):
 
 logger = dashboard.create_logger()
 checkpoint = recursivelySelectFile()
-module = GMSCDataModule()
+module = models.get(args.model_type)()
 model = MultiTaskLearner.load_from_checkpoint(checkpoint)
 trainer = Trainer(resume_from_checkpoint=checkpoint, logger=logger, callbacks=[*create_checkpoint_callbacks("gmsc")],)
 trainer.fit(model, module)
