@@ -32,15 +32,19 @@ class MTLFakeDataModule(LightningDataModule):
         )
 
     def prepare_data(self):
-        CSV_FILE = "data/fake/augmented_counterfactuals_5_6.csv"
+        CSV_FILE = (
+            "data/fake/fake_data.csv"  # "data/fake/augmented_counterfactuals_5_6.csv"
+        )
         self.data = pd.read_csv(CSV_FILE)
         self.row_length = self.data.shape[1] - 1  # Remove predictor
         self.labels = self.data.columns[1:]
-        DELTA_COUNTERFACTUALS_CSV_FILE = "data/fake/augmented_delta_counterfactuals_5_6.csv"
-        counterfactuals_data = pd.read_csv(DELTA_COUNTERFACTUALS_CSV_FILE, header=None)
+        print("Length of labels: ", len(self.labels))
+        DELTA_COUNTERFACTUALS_CSV_FILE = "data/fake/manual_explanations.csv"  # "data/fake/augmented_delta_counterfactuals_5_6.csv"
+        counterfactuals_data = pd.read_csv(DELTA_COUNTERFACTUALS_CSV_FILE)
         squashed_counterfactuals = [
             "".join(str(row)) for row in counterfactuals_data.values[:, 1:]
         ]
+        print("Length of squashed: ", len(squashed_counterfactuals))
         self.data.insert(0, "counterfactual delta", squashed_counterfactuals)
 
     def setup(self, step):
@@ -49,7 +53,9 @@ class MTLFakeDataModule(LightningDataModule):
         dataset = self.data
         dataset_length = len(dataset.values)
         training_split_length = math.floor(dataset_length * self.training_size)
-        test_split_length = training_split_length + math.floor(dataset_length * self.test_size)
+        test_split_length = training_split_length + math.floor(
+            dataset_length * self.test_size
+        )
         self.training_split = dataset[:training_split_length]
         self.test_split = dataset[training_split_length:test_split_length]
         self.validate_split = dataset[test_split_length:]
