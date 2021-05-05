@@ -12,6 +12,7 @@ from runners.GMSC_runner import GMSC_Runner
 from runners.STL_GMSC_runner import STL_GMSC_Runner
 from runners.STL_Fake_runner import STL_Fake_Runner
 from runners.MTL_Fake_runner import MTL_Fake_Runner
+from runners.PartialRunner import PartialRunner
 from config import config
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
@@ -26,11 +27,20 @@ runners = {
     "stl_gmsc": STL_GMSC_Runner,
     "stl_fake": STL_Fake_Runner,
     "fake": MTL_Fake_Runner,
+    "partial": PartialRunner,
 }
 
 parser = ArgumentParser(description="A multitask learner")
 parser.add_argument("model_type", choices=runners.keys(), help="Type of model")
 parser.add_argument("--tag", type=str, help="Tag for model")
+parser.add_argument(
+    "--train_size", type=int, help="Train size for partial training only"
+)
+parser.add_argument(
+    "--module_type",
+    type=str,
+    help="Module type for partial training only, only used with model_type 'partial'",
+)
 parser = pl.Trainer.add_argparse_args(parser)
 
 

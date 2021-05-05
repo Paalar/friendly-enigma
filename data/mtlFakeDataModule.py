@@ -24,12 +24,6 @@ class MTLFakeDataModule(LightningDataModule):
         self.batch_size = (
             config["batch_size"] if type(config["batch_size"]) is int else batch_size
         )
-        self.workers = (
-            config["cpu_workers"] if type(config["cpu_workers"]) is int else workers
-        )
-        self.batch_size = (
-            config["batch_size"] if type(config["batch_size"]) is int else batch_size
-        )
 
     def prepare_data(self):
         CSV_FILE = (
@@ -38,13 +32,11 @@ class MTLFakeDataModule(LightningDataModule):
         self.data = pd.read_csv(CSV_FILE)
         self.row_length = self.data.shape[1] - 1  # Remove predictor
         self.labels = self.data.columns[1:]
-        print("Length of labels: ", len(self.labels))
         DELTA_COUNTERFACTUALS_CSV_FILE = "data/fake/manual_explanations.csv"  # "data/fake/augmented_delta_counterfactuals_5_6.csv"
         counterfactuals_data = pd.read_csv(DELTA_COUNTERFACTUALS_CSV_FILE)
         squashed_counterfactuals = [
             "".join(str(row)) for row in counterfactuals_data.values[:, 1:]
         ]
-        print("Length of squashed: ", len(squashed_counterfactuals))
         self.data.insert(0, "counterfactual delta", squashed_counterfactuals)
 
     def setup(self, step):

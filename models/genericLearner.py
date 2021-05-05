@@ -78,18 +78,20 @@ class GenericLearner(pl.LightningModule, ABC):
         raise NotImplementedError
 
     def test_epoch_end(self, outs):
-        pass
         for head in range(self.heads):
             self.metrics_compute("test", head=head)
 
     def training_epoch_end(self, outs):
-        pass
         for head in range(self.heads):
             self.metrics_compute("train", head=head)
 
     def metrics_compute(self, label, head):
         metric = self.metrics[label][head]
-        self.log_dict(metric.compute())
+        try:
+            self.log_dict(metric.compute())
+        except ValueError as e:
+            print(e)
+            print("Continuing..")
 
     def metrics_update(self, label, prediction, target, head=0):
         metric = self.metrics[label][head]
