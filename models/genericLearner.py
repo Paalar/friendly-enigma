@@ -41,7 +41,9 @@ class GenericLearner(pl.LightningModule, ABC):
                     num_classes=num_classes[index]
                 )
                 if index == 0:
-                    head[f"AUROC/head-{index}/{label}"] = tm.AUROC()
+                    auroc = tm.AUROC()
+                    auroc.reorder = True
+                    head[f"AUROC/head-{index}/{label}"] = auroc
         metrics_as_MetricCollection = [
             tm.MetricCollection(head) for head in metrics_per_head
         ]

@@ -1,6 +1,6 @@
 cpu_workers: 8
 
-batch_size: 1000
+batch_size: 100
 stl_epochs: 20
 mtl_epochs: 100
 
@@ -8,11 +8,11 @@ training_size_percentage: 75
 test_size_percentage: 15
 # Validation size is the rest of the percentage
 
-nodes_before_split: 64
+nodes_before_split: 256
 stl_learning_rate: 0.01
 mtl_learning_rate: 0.01
 
-hidden_layers: [64, 64]
+hidden_layers: [256, 256]
 # The activations list needs to be the length of hidden_layers + 1
 # as the last layer is provided by nodes_before_split
 activations: ['relu', 'relu', 'relu']

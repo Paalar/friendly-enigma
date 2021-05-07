@@ -188,7 +188,5 @@ class MultiTaskLearner(GenericLearner):
         alignment_weight = (
             0.5  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
         )
-        return (
-            ((loss_prediction + loss_explanation) / 2) * pred_weight
-            + convergence * alignment_weight
-        ) / 2
+
+        return (loss_prediction + loss_explanation) / 2
