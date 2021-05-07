@@ -36,7 +36,17 @@ class GenericLearner(pl.LightningModule, ABC):
         metrics_per_head = [{} for head in range(heads)]
         for index, head in enumerate(metrics_per_head):
             for metric in metrics:
-                head.update({f"{metric.__name__}/head-{index}/{label}": metric()})
+                try:
+                    head.update(
+                        {
+                            f"{metric.__name__}/head-{index}/{label}": metric(
+                                num_classes=num_classes[index]
+                            )
+                        }
+                    )
+                except TypeError:
+                    head.update({f"{metric.__name__}/head-{index}/{label}": metric()})
+
                 head[f"FBeta/head-{index}/{label}"] = tm.FBeta(
                     num_classes=num_classes[index]
                 )
