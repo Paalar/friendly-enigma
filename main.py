@@ -55,7 +55,7 @@ def seed_random(seed):
 
 
 def main():
-    seed = int((time.time() + 1e6 * np.random.rand()) * 1e3) % 4294967295
+    seed = 12345  # int((time.time() + 1e6 * np.random.rand()) * 1e3) % 4294967295
     seed_random(seed)
     args = parser.parse_args()
     config["device"] = "cuda:0" if type(args.gpus) is int else "cpu"
