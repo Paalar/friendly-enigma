@@ -4,6 +4,9 @@ import pytorch_lightning as pl
 import torch
 import numpy as np
 import os
+import sys
+import time
+import random
 
 from runners.STL_runner import STLRunner
 from runners.MTL_runner import MTLRunner
@@ -47,15 +50,17 @@ parser = pl.Trainer.add_argparse_args(parser)
 def seed_random(seed):
     np.random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
     torch.manual_seed(seed)
 
 
 def main():
-    seed_random(12345)
+    seed = int((time.time() + 1e6 * np.random.rand()) * 1e3) % 4294967295
+    seed_random(seed)
     args = parser.parse_args()
     config["device"] = "cuda:0" if type(args.gpus) is int else "cpu"
     config["cpu_workers"] = config["cpu_workers"] if config["device"] == "cpu" else 0
-    learner = runners.get(args.model_type)(args=args)
+    learner = runners.get(args.model_type)(args=args, seed=seed)
     learner.run()
 
 

@@ -24,6 +24,7 @@ class STLRunner:
         checkpoints_prefix="stl",
         tune_config=None,
         args=None,
+        seed=None,
     ):
         self.max_epochs = max_epochs
         self.nodes_before_split = nodes_before_split
@@ -34,6 +35,7 @@ class STLRunner:
         )
         self.checkpoints_prefix = checkpoints_prefix
         self.args = args
+        self.seed = seed
         input_length = self.data_module.row_length
         self.model_core = Net(
             input_length=input_length,
@@ -65,6 +67,7 @@ class STLRunner:
         self.logger.experiment.log_table(
             "validation.csv", tabular_data=self.data_module.validate_split
         )
+        self.logger.experiment.log_other("Seed", self.seed)
 
 
 def create_checkpoint_callbacks(prefix):
