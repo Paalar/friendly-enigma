@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 data_dir = Path(__file__).parent.absolute()
-fake_data = pd.read_csv(f"{data_dir}/fake_data.csv")
+fake_data = pd.read_csv(f"{data_dir}/fake_data_epsilond.csv")
 targets = fake_data.iloc[:, 0]
 data = fake_data.iloc[:, 1:]
 mins = data.idxmin(axis=1)
