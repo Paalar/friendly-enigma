@@ -5,6 +5,12 @@ import os
 from pathlib import Path
 import numpy as np
 import math
+from argparse import ArgumentParser
+
+parser = ArgumentParser(description="Fake data generation for Friendly Enigma")
+parser.add_argument("noise", type=int, default=0, help="Noise threshold in percentage")
+
+args = parser.parse_args()
 
 np.random.seed(123)
 os.environ["PYTHONHASHSEED"] = str(123)
@@ -29,7 +35,8 @@ epsilond = 0
 
 def get_sum_with_max_contribution_per_value_with_epsilon(tensor: torch.Tensor):
     global epsilond
-    epsilon_threshold = 0.5
+    global args
+    epsilon_threshold = args.noise / 100
     values = tensor.tolist()
     target_val = 0
     epsilon = np.random.random()
