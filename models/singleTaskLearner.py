@@ -55,7 +55,7 @@ class SingleTaskLearner(GenericLearner):
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
-        return optim.Adadelta(self.parameters(), lr=self.learning_rate)
+        return optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def calculate_loss(self, prediction, correct_label):
         loss = self.loss_function(prediction, correct_label)

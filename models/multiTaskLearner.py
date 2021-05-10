@@ -127,7 +127,7 @@ class MultiTaskLearner(GenericLearner):
         self.log("Loss/test", loss_prediction)
 
     def configure_optimizers(self):
-        return optim.Adadelta(self.parameters(), lr=self.learning_rate, weight_decay=0)
+        return optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=0)
 
     def calculate_loss(self, prediction, correct_label, head=0):
         loss_function = self.loss_functions[head]
@@ -189,4 +189,7 @@ class MultiTaskLearner(GenericLearner):
             0.5  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
         )
 
-        return (loss_prediction + loss_explanation) / 2
+        return (
+            pred_weight * ((loss_prediction + loss_explanation) / 2)
+            + alignment_weight * convergence
+        )
