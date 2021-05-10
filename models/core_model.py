@@ -40,5 +40,7 @@ def get_activation(name):
         return nn.ReLU()
     elif name == "sigmoid":
         return nn.Sigmoid()
+    elif name == "leakyrelu":
+        return nn.LeakyReLU()
     else:
         return nn.ReLU()
