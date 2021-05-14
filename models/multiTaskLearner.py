@@ -33,7 +33,11 @@ def get_multiclass_target(target):
 
 class MultiTaskLearner(GenericLearner):
     def __init__(
-        self, model_core: Net, input_length: int, output_length: Tuple[int, int]
+        self,
+        model_core: Net,
+        input_length: int,
+        output_length: Tuple[int, int],
+        use_signloss: bool,
     ):
         super(MultiTaskLearner, self).__init__(
             num_classes=output_length, model_core=model_core
@@ -47,6 +51,7 @@ class MultiTaskLearner(GenericLearner):
         # Loss functions per head
         self.loss_functions = [F.binary_cross_entropy, nll]
         self.prediction_head.register_forward_hook(self.forward_hook)
+        self.use_signloss = use_signloss
 
     def forward(self, data_input):
         data_input = data_input.to(torch.float32)  # C-CHVAE
@@ -188,8 +193,9 @@ class MultiTaskLearner(GenericLearner):
         alignment_weight = (
             0.5  # (1 if self.current_epoch > 100 else 200 / (self.current_epoch + 1))
         )
-
-        return (
-            pred_weight * ((loss_prediction + loss_explanation) / 2)
-            + alignment_weight * convergence
-        )
+        if self.use_signloss:
+            return (
+                pred_weight * ((loss_prediction + loss_explanation) / 2)
+                + alignment_weight * convergence
+            )
+        return (loss_explanation + loss_prediction) / 2

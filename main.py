@@ -1,4 +1,5 @@
 # Comet has to be imported first, that's just how it is.
+from utils.string2bool import str2bool
 import comet_ml
 import pytorch_lightning as pl
 import torch
@@ -44,6 +45,12 @@ parser.add_argument(
     type=str,
     help="Module type for partial training only, only used with model_type 'partial'",
 )
+parser.add_argument(
+    "--use_signloss",
+    type=str2bool,
+    default=False,
+    help="Whether to use sign difference loss. Default False.",
+)
 parser = pl.Trainer.add_argparse_args(parser)
 
 
@@ -55,7 +62,7 @@ def seed_random(seed):
 
 
 def main():
-    seed = 12345  # int((time.time() + 1e6 * np.random.rand()) * 1e3) % 4294967295
+    seed = int((time.time() + 1e6 * np.random.rand()) * 1e3) % 4294967295
     seed_random(seed)
     args = parser.parse_args()
     config["device"] = "cuda:0" if type(args.gpus) is int else "cpu"
