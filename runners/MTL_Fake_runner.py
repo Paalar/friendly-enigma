@@ -1,19 +1,15 @@
 from data.mtlFakeDataModule import MTLFakeDataModule
-from runners.STL_runner import STLRunner
+from runners.MTL_runner import MTLRunner
 from config import config
 from models.multiTaskLearner import MultiTaskLearner
 
 
-class MTL_Fake_Runner(STLRunner):
+class MTL_Fake_Runner(MTLRunner):
     def __init__(self, **kwargs):
         super().__init__(
-            **kwargs,
-            data_module=MTLFakeDataModule(),
-            max_epochs=config["mtl_epochs"],
-            checkpoints_prefix="mtl_fake",
-        )
-        self.model = MultiTaskLearner(
-            model_core=self.model_core,
-            input_length=self.nodes_before_split,
-            output_length=(1, len(self.data_module.labels)),
+            **{
+                "data_module": MTLFakeDataModule(),
+                "checkpoints_prefix": "mtl_fake",
+                **kwargs,
+            }
         )

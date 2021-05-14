@@ -53,6 +53,8 @@ class PartialRunner(STLRunner):
                 f"Could not parse model type from module type {module_type}"
             )
 
+        cli_args = kwargs["args"] if "args" in kwargs else None
+        use_signloss = cli_args.use_signloss if cli_args else False
         super().__init__(
             **kwargs,
             data_module=partial_module(),
@@ -64,4 +66,5 @@ class PartialRunner(STLRunner):
             model_core=self.model_core,
             input_length=self.nodes_before_split,
             output_length=output_length,
+            use_signloss=use_signloss,
         )
