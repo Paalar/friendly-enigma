@@ -65,7 +65,7 @@ def theta_estimation_from_y(samples_y, types_list, batch_size, reuse):
     for i, d in enumerate(samples_y):
 
         observed_y = samples_y[i]
-        nObs = tf.shape(input=observed_y)[0]
+        nObs = tf.shape(observed_y)[0]
 
         # Different layer models for each type of variable
         if types_list[i]['type'] == 'real':

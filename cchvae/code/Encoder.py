@@ -76,9 +76,9 @@ def z_proposal_GMM_factorized(X, samples_s, batch_size, z_dim, reuse):
     mean_qz.append(tf.zeros([batch_size, z_dim]))
 
     # Compute full parameters, as a product of Gaussians distribution
-    log_var_qz_joint = -tf.reduce_logsumexp(input_tensor=tf.negative(log_var_qz), axis=0)
+    log_var_qz_joint = -tf.reduce_logsumexp(tf.negative(log_var_qz), 0)
     mean_qz_joint = tf.multiply(tf.exp(log_var_qz_joint),
-                                tf.reduce_sum(input_tensor=tf.multiply(mean_qz, tf.exp(tf.negative(log_var_qz))), axis=0))
+                                tf.reduce_sum(tf.multiply(mean_qz, tf.exp(tf.negative(log_var_qz))), 0))
 
     # Avoid numerical problems
     # log_var_qz = tf.clip_by_value(log_var_qz, -15.0, 15.0)
@@ -115,9 +115,9 @@ def z_proposal_GMM_factorized_c(X, X_c, samples_s, batch_size, z_dim, reuse):
     mean_qz.append(tf.zeros([batch_size, z_dim]))
 
     # Compute full parameters, as a product of Gaussians distribution
-    log_var_qz_joint = -tf.reduce_logsumexp(input_tensor=tf.negative(log_var_qz), axis=0)
+    log_var_qz_joint = -tf.reduce_logsumexp(tf.negative(log_var_qz), 0)
     mean_qz_joint = tf.multiply(tf.exp(log_var_qz_joint),
-                                tf.reduce_sum(input_tensor=tf.multiply(mean_qz, tf.exp(tf.negative(log_var_qz))), axis=0))
+                                tf.reduce_sum(tf.multiply(mean_qz, tf.exp(tf.negative(log_var_qz))), 0))
 
     # Avoid numerical problems
     # log_var_qz = tf.clip_by_value(log_var_qz, -15.0, 15.0)
@@ -154,8 +154,8 @@ def z_proposal_distribution_GMM(x_list, x_list_c, samples_s, z_dim, reuse):
     mean_qz.append(tf.zeros([batch_size, z_dim]))
 
     # Compute full parameters, as a product of Gaussians distribution
-    log_var_qz_joint = -tf.reduce_logsumexp(input_tensor=tf.negative(log_var_qz), axis=0)
-    mean_qz_joint = tf.multiply(tf.exp(log_var_qz_joint),tf.reduce_sum(input_tensor=tf.multiply(mean_qz, tf.exp(tf.negative(log_var_qz))), axis=0))
+    log_var_qz_joint = -tf.reduce_logsumexp(tf.negative(log_var_qz), 0)
+    mean_qz_joint = tf.multiply(tf.exp(log_var_qz_joint),tf.reduce_sum(tf.multiply(mean_qz, tf.exp(tf.negative(log_var_qz))), 0))
 
     # Avoid numerical problems
     # log_var_qz = tf.clip_by_value(log_var_qz, -15.0, 15.0)
@@ -203,7 +203,7 @@ def z_distribution_GMM(samples_s, z_dim, reuse):
                               kernel_initializer=tf.compat.v1.random_normal_initializer(stddev=0.05),
                               name='layer_1_' + 'mean_dec_z', reuse=reuse)
 
-    log_var_pz = tf.zeros([tf.shape(input=samples_s)[0], z_dim])
+    log_var_pz = tf.zeros([tf.shape(samples_s)[0], z_dim])
 
     # Avoid numerical problems
     log_var_pz = tf.clip_by_value(log_var_pz, -15.0, 15.0)

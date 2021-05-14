@@ -22,17 +22,17 @@ import argparse
 def getArgs(argv=None):
     parser = argparse.ArgumentParser(description='Default parameters of the models', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--batch_size', type=int, default=100, help='Size of the batches')
-    parser.add_argument('--epochs', type=int, default=10000, help='Number of epochs of the simulations')
+    parser.add_argument('--epochs', type=int, default=500, help='Number of epochs of the simulations')
     parser.add_argument('--train', type=int, default=1, help='Training model flag')
     parser.add_argument('--display', type=int, default=1, help='Display option flag')
-    parser.add_argument('--dim_latent_s', type=int, default=3, help='Dimension of the categorical space')
-    parser.add_argument('--dim_latent_z', type=int, default=2, help='Dimension of the Z latent space')
-    parser.add_argument('--dim_latent_y', type=int, default=5, help='Dimension of the Y latent space')
+    parser.add_argument('--dim_latent_s', type=int, default=1, help='Dimension of the categorical space')
+    parser.add_argument('--dim_latent_z', type=int, default=1, help='Dimension of the Z latent space')
+    parser.add_argument('--dim_latent_y', type=int, default=1, help='Dimension of the Y latent space')
     parser.add_argument('--dim_latent_y_partition', type=int, nargs='+', help='Partition of the Y latent space')
-    parser.add_argument('--types_file', type=str, default='cchvae/data/gmsc/2_10/gmsc_types.csv', help='File with the types of the data')
-    parser.add_argument('--types_file_c', type=str, default='cchvae/data/gmsc/2_10/gmsc_types_c.csv', help='File with the types of the conditioning data')
-    parser.add_argument('--norm_latent_space', type=int, default=2, help='To measure distance between latent variables')
-    parser.add_argument('--step_size', type=float, default=0.5, help='Step size for Random Search')
+    parser.add_argument('--types_file', type=str, default='cchvae/data/fake/_/fake_types.csv', help='File with the types of the data')
+    parser.add_argument('--types_file_c', type=str, default='cchvae/data/fake/_/fake_types_c.csv', help='File with the types of the conditioning data')
+    parser.add_argument('--norm_latent_space', type=int, default=1, help='To measure distance between latent variables')
+    parser.add_argument('--step_size', type=float, default=10, help='Step size for Random Search')
     parser.add_argument('--search_samples', type=int, default=1000, help='Number search samples for counterfactual search')
     parser.add_argument('--ncounterfactuals', type=int, default=100, help='First #counterf. test data points for which we find counterf.')
     parser.add_argument('--degree_active', type=float, default=1, help='active latent variable threshold')
@@ -266,7 +266,7 @@ def batch_normalization(batch_data_list, types_list, batch_size):
         observed_data = d
         if types_list[i]['type'] == 'real':
             # We transform the data to a gaussian with mean 0 and std 1
-            data_mean, data_var = tf.nn.moments(x=observed_data, axes=0)
+            data_mean, data_var = tf.nn.moments(observed_data, 0)
             data_var = tf.clip_by_value(data_var, 1e-6, 1e20)  # Avoid zero values
             aux_X = tf.nn.batch_normalization(observed_data, data_mean, data_var, offset=0.0, scale=1.0,
                                               variance_epsilon=1e-6)
@@ -281,11 +281,11 @@ def batch_normalization(batch_data_list, types_list, batch_size):
         elif types_list[i]['type'] == 'pos':
 
             # We transform the log of the data to a gaussian with mean 0 and std 1
-            observed_data_log = tf.math.log(1 + observed_data)
-            data_mean_log, data_var_log = tf.nn.moments(x=observed_data_log, axes=0)
+            observed_data_log = tf.log(1 + observed_data)
+            data_mean_log, data_var_log = tf.nn.moments(observed_data_log, 0)
             data_var_log = tf.clip_by_value(data_var_log, 1e-6, 1e20)  # Avoid zero values
             aux_X = tf.nn.batch_normalization(observed_data_log, data_mean_log, data_var_log, offset=0.0, scale=1.0,
-                                              variance_epsilon=1e-6)
+                                                variance_epsilon=1e-6)
 
             normalized_data.append(aux_X)
             normalization_parameters.append([data_mean_log, data_var_log])
@@ -293,11 +293,11 @@ def batch_normalization(batch_data_list, types_list, batch_size):
         elif types_list[i]['type'] == 'count':
 
             # We transform the log of the data to a gaussian with mean 0 and std 1
-            observed_data_log = tf.math.log(1 + observed_data)
-            data_mean_log, data_var_log = tf.nn.moments(x=observed_data_log, axes=0)
+            observed_data_log = tf.log(1 + observed_data)
+            data_mean_log, data_var_log = tf.nn.moments(observed_data_log, 0)
             data_var_log = tf.clip_by_value(data_var_log, 1e-6, 1e20)  # Avoid zero values
             aux_X = tf.nn.batch_normalization(observed_data_log, data_mean_log, data_var_log, offset=0.0, scale=1.0,
-                                              variance_epsilon=1e-6)
+                                                variance_epsilon=1e-6)
 
             normalized_data.append(aux_X)
             normalization_parameters.append([data_mean_log, data_var_log])
@@ -306,9 +306,9 @@ def batch_normalization(batch_data_list, types_list, batch_size):
         else:
             # Don't normalize the categorical and ordinal variables
             normalized_data.append(d)
-            normalization_parameters.append(tf.convert_to_tensor(value=[0.0, 1.0], dtype=tf.float32))  # No normalization here
+            normalization_parameters.append(tf.convert_to_tensor([0.0, 1.0], dtype=tf.float32))  # No normalization here
 
-            aux_X_noisy = d + tf.random.normal((batch_size, 1), 0, 0.05, dtype=tf.float32)
+            aux_X_noisy = d + tf.random_normal((batch_size, 1), 0, 0.05, dtype=tf.float32)
             noisy_data.append(aux_X_noisy)
 
 
