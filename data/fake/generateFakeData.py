@@ -3,12 +3,11 @@ import pandas as pd
 import numpy as np
 import os
 from pathlib import Path
-import numpy as np
 import math
 from argparse import ArgumentParser
 
 parser = ArgumentParser(description="Fake data generation for Friendly Enigma")
-parser.add_argument("noise", type=int, default=0, help="Noise threshold in percentage")
+parser.add_argument("noise", type=int, nargs="?", default=0, help="Noise threshold in percentage")
 
 args = parser.parse_args()
 
