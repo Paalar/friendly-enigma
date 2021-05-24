@@ -16,7 +16,7 @@ records = df.to_numpy()
 types_column_names = ["type", "dim", "nclass"]
 
 locked_features = config["cchvae_locked_features_fake"]
-free_features = [i for i in range(1, 6) if (i not in locked_features)]
+free_features = [i for i in range(1, 4) if (i not in locked_features)]
 
 fake_x_c = {index: records[:, value] for index, value in enumerate(locked_features)}
 fake_x = {index: records[:, value] for index, value in enumerate(free_features)}

@@ -31,7 +31,7 @@ class STLFakeDataModule(LightningDataModule):
         )
 
     def prepare_data(self):
-        CSV_FILE = "data/fake/fake_data_times_100.csv"
+        CSV_FILE = "data/fake/fake_data_epsilond.csv"
         self.data = pd.read_csv(CSV_FILE)
         self.row_length = self.data.shape[1] - 1  # Remove predictor
         self.labels = self.data.columns[1:]
@@ -42,7 +42,9 @@ class STLFakeDataModule(LightningDataModule):
         dataset = self.data
         dataset_length = len(dataset.values)
         training_split_length = math.floor(dataset_length * self.training_size)
-        test_split_length = training_split_length + math.floor(dataset_length * self.test_size)
+        test_split_length = training_split_length + math.floor(
+            dataset_length * self.test_size
+        )
         self.training_split = dataset[:training_split_length]
         self.test_split = dataset[training_split_length:test_split_length]
         self.validate_split = dataset[test_split_length:]

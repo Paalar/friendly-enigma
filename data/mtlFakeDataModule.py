@@ -26,9 +26,7 @@ class MTLFakeDataModule(LightningDataModule):
         )
 
     def prepare_data(self):
-        CSV_FILE = (
-            "data/fake/fake_data.csv"  # "data/fake/augmented_counterfactuals_5_6.csv"
-        )
+        CSV_FILE = "data/fake/fake_data_epsilond.csv"  # "data/fake/augmented_counterfactuals_5_6.csv"
         self.data = pd.read_csv(CSV_FILE)
         self.row_length = self.data.shape[1] - 1  # Remove predictor
         self.labels = self.data.columns[1:]
