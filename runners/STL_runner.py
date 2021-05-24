@@ -58,16 +58,20 @@ class STLRunner:
         trainer.fit(self.model, self.data_module)
         trainer.test(self.model, datamodule=self.data_module)
         # dashboard.create_confusion_matrix(self.model, self.logger, self.data_module)
-        self.logger.experiment.log_table(
-            "training.csv", tabular_data=self.data_module.training_split
-        )
-        self.logger.experiment.log_table(
-            "test.csv", tabular_data=self.data_module.test_split
-        )
-        self.logger.experiment.log_table(
-            "validation.csv", tabular_data=self.data_module.validate_split
-        )
-        self.logger.experiment.log_other("Seed", self.seed)
+        try:
+            self.logger.experiment.log_table(
+                "training.csv", tabular_data=self.data_module.training_split
+            )
+            self.logger.experiment.log_table(
+                "test.csv", tabular_data=self.data_module.test_split
+            )
+            self.logger.experiment.log_table(
+                "validation.csv", tabular_data=self.data_module.validate_split
+            )
+            self.logger.experiment.log_other("Seed", self.seed)
+        except:
+            # Some logging methods differ for each logger type. These are meant for Comet.ml. If they are not present, just surpress errors.
+            pass
 
 
 def create_checkpoint_callbacks(prefix):
