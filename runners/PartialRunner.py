@@ -62,9 +62,16 @@ class PartialRunner(STLRunner):
             checkpoints_prefix=f"{module_type}-partial",
         )
         output_length = (1, len(self.data_module.labels)) if model_type == "mtl" else 1
-        self.model = model(
-            model_core=self.model_core,
-            input_length=self.nodes_before_split,
-            output_length=output_length,
-            use_signloss=use_signloss,
-        )
+        if model_type == "stl":
+            self.model = model(
+                model_core=self.model_core,
+                input_length=self.nodes_before_split,
+                output_length=output_length,
+            )
+        else:
+            self.model = model(
+                model_core=self.model_core,
+                input_length=self.nodes_before_split,
+                output_length=output_length,
+                use_signloss=use_signloss,
+            )
