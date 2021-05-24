@@ -12,23 +12,11 @@ class GenericLearner(pl.LightningModule, ABC):
     def __init__(self, model_core: Net, num_classes: int = [1]):
         super(GenericLearner, self).__init__()
         self.rest_of_model = model_core
-        metrics = [tm.Accuracy, tm.Precision, tm.Recall]
-        self.metrics = [
-            [metric().to(get_device()) for metric in metrics]
-            for head in range(len(num_classes))
-        ]
         self.heads = len(num_classes)
-        for index, head in enumerate(num_classes):
-            self.metrics[index].append(
-                pl.metrics.FBeta(num_classes=head).to(get_device())
-            )
-            # self.metrics[index].append(tm.AUROC(num_classes=head))
-            # self.metrics[index].append(pl.metrics.ConfusionMatrix(num_classes=2 if head == 1 else head))
         self.metrics = {
             "test": self.instantiate_metrics("test", num_classes),
             "train": self.instantiate_metrics("train", num_classes),
         }
-        self.train_head2_AUROC = tm.AUROC(num_classes=10)
 
     def instantiate_metrics(self, label, num_classes):
         heads = len(num_classes)
