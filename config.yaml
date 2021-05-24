@@ -1,9 +1,8 @@
-
 cpu_workers: 8
 
 batch_size: 1000
-stl_epochs: 200
-mtl_epochs: 200
+stl_epochs: 40
+mtl_epochs: 40
 
 training_size_percentage: 75
 test_size_percentage: 15
@@ -23,4 +22,3 @@ loss_converge_method: gradients
 # data/cchvae_split.py
 cchvae_locked_features_heloc: [1, 2, 4]
 cchvae_locked_features_gmsc: [2, 10]
-

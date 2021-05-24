@@ -1,33 +1,61 @@
 # Friendly-Enigma
-An attempt at using the HELOC-dataset with a multitask-learner to predict RiskPerformance as well as outputting a SHAPley-style feature analysis explanation.
+
+The Friendly-Enigma architecture was developed as part of our master thesis at the Department of Computer Science and Informatics at the Norwegian University of Science and Technology.  
+The architecture is a two-headed multi-task learner architecture with explanations as the secondary head.  
+Through our novel sign-difference loss, we ensure that the heads utilize the shared layers in a similar manner, i.e., positive information for the prediction head should also be positive for the explanation.  
+We researched whether we could use existing methods for generating explanations to use as training data, which can be seen in the `cchvae`-folder.  
+This folder includes our updated version of Pawelczyk, et al.'s [implementation](https://github.com/MartinPawel/c-chvae), with only minimal changes to be able to use Tensorflow 2.4.1.
+To verify the architecture, we generate a synthetic dataset through `data/fake/generateFakeData.py`.
+
+The synthetic dataset has five (5) features; four (4) predictors and one (1) target, where the target feature is a binary classification problem. 50000 instances were created in this dataset.  
+The four features are integers of a random value between -50 and 50, where each value has an intrinsic \textit{contribution value} between -20 and 20.  
+If a feature is below -20, e.g., -25, its contribution value is limited to -20, and equivalently for positive values.  
+The weighted sum of all features is between -80 and 80.  
+A positive example in this dataset is when a row's contribution sum is above or equal to 20. All other examples are negative. This dataset has 20\% positive examples and 80\% negative examples split.
 
 ## Setup
-Request access to the [FICO-HELOC Dataset](https://community.fico.com/s/explainable-machine-learning-challenge?tabset-3158a=2) and download it.  
-Place it in the project source folder.
 
-### Torch Cuda (GPU)
-To use GPUs you need a special version of torch that includes Cuda.
-This can be done by the command 
-
-```bash
-poetry add https://download.pytorch.org/whl/cu110/torch-1.7.1%2Bcu110-cp38-cp38-win_amd64.whl --platform win64
-```
-
-This will add torch 1.7.1 with cu110 for Windows 64
-to find different versions, see [https://download.pytorch.org/whl/torch_stable.html](https://download.pytorch.org/whl/torch_stable.html)
+Install [Poetry](https://python-poetry.org/docs/) or use Python3.8 with Pip.
 
 ### requirements.txt
-If you do not or can not install with poetry on a certain machine, you can use the command 
+
+If you do not or can not install with poetry on a certain machine, you can use the command
 
 ```bash
 poetry export -f requirements.txt --output requirements.txt
 ```
 
+or install through our latest exported `requirements.txt`.
+
 To generate a requirements.txt file. See [https://python-poetry.org/docs/cli/#export](https://python-poetry.org/docs/cli/#export) for other options.
 
 ## Run
+
+#### Poetry
+
 ```bash
 poetry install
 
-poetry run python main.py
+poetry shell
+
+python -m data.fake.generateFakeDay
+python -m data.fake.generateOneHotExplanationsFromFake
+
+python main.py fake
 ```
+
+#### Pip
+
+```bash
+pip install -r requirements.txt
+
+python -m data.fake.generateFakeDay
+python -m data.fake.generateOneHotExplanationsFromFake
+
+python main.py fake
+```
+
+## Minimal Example
+
+For a short insight into the architecture, you can run our minimal example.  
+Install requirements through your preferred method above, then run `python minimal_example.py`.
